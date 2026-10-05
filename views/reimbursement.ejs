@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.0/css/boxicons.min.css">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <title>Reimbursement</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<style>
+  
+  button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .container {
+    position: relative;
+    width: 100%;
+  }
+
+  .right-aligned {
+    position: absolute;
+    top: -22px;
+    right: 0;
+  }
+
+  .right-aligned button {
+    border-radius: 5px;
+  }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #ccc;
+  }
+
+  .close-icon:hover {
+    color: #555;
+  }
+
+  .form-container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+  }
+
+  .form-container.active {
+    display: block;
+  }
+
+
+  /* item Form */
+  #personForm {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 50%;
+  }
+
+  #personForm h2 {
+    font-family: Montserrat;
+    font-weight: 700;
+    color: #0056b3;
+    margin-bottom: 20px;
+  }
+
+  #personForm label {
+    font-weight: 600;
+  }
+
+  #personForm input[type="text"],
+  #personForm input[type="email"],
+  #personForm input[type="tel"] {
+    width: calc(100% - 40px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  #personForm input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  #personForm input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+</style>
+
+<body>
+  <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+
+  <%- include('./sidenavbar.ejs') %>
+  <%- include('./alert_msg.ejs') %>
+
+  <% function formatDateToDDMMYYYY(date) {
+    const formattedDate = new Date(date);
+    const day = String(formattedDate.getDate()).padStart(2, '0');
+    const month = String(formattedDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = formattedDate.getFullYear();
+    return `${day}-${month}-${year}`;
+} %>
+
+      <!-- invester section -->
+      <section id="content">
+        <nav>
+          <i class="bx bx-transfer-alt"></i>
+          <div class="container">
+            <div class="right-aligned">
+              <button onclick="toggleForm('personForm')">Add Employee</button>
+            </div>
+            </div>
+        </nav>
+
+        <div class="overlay" onclick="closeForms()"></div>
+
+        <div id="personForm" class="form-container">
+          <h2 style="font-family: Montserrat; font-weight: 700; color: #0056b3;">Add Reimburse</h2>
+          <span class="close-icon" onclick="closeForm('personForm')"><i class='bx bx-x'></i></span>
+          
+          
+          <form action="/add-employee" method="post">
+            <label for="empName">Name:</label><br>
+            <input type="text" id="empName" name="Name" style="width: 100%;" required><br>
+            <label for="empEmail">Email:</label><br>
+            <input type="email" id="empEmail" name="Email" style="width: 100%;" required><br>
+            <label for="empPhone">Phone Number:</label><br>
+            <input type="tel" id="empPhone" name="Number" style="width: 100%;" required><br><br>
+            <button type="submit" id="emp_submit">Add</button>
+          </form>
+      
+      
+        </div>
+
+
+
+
+        <!-- invester section -->
+
+        <main id="investerDetail">
+          <div class="head-title">
+            <div class="left">
+              <h1>Reimbursement</h1>
+              <ul class="breadcrumb">
+                <li>
+                  <a href="#">Reimbursement</a>
+                </li>
+                <li><i class='bx bx-chevron-right'></i></li>
+                <li>
+                  <a class="active" href="#">Dashboard</a>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+          <ul class="box-information">
+            <li>
+              <div class="icon-container" style="background: var(--light-blue);">
+                <i class='bx bxs-bank' style="color: var(--blue);"></i>
+              </div>
+              <div class="text" style=" padding: 20px; text-align: center;">
+                <h3>
+                  <%=reimbursement_data.length%>
+                </h3>
+                <p>Total Reimbursements This Month</p>
+              </div>
+            </li>
+            <li>
+              <div class="icon-container" style="background: var(--light-yellow);">
+                <i class='bx bxs-coin-stack' style="color: var(--yellow);"></i>
+              </div>
+              <div class="text " style=" padding: 20px; text-align: center;">
+                <h3>
+                  <%=pending_reimbursement_data.length%>
+                </h3>
+                <p>Pending Reimbursements Till Now</p>
+              </div>
+            </li>
+            <li>
+
+              <div class="icon-container" style="background: var(--light-purple);">
+                <i class='bx bxs-dollar-circle' style="color: var(--purple);"></i>
+              </div>
+              <div class="text" style=" padding: 20px; text-align: center;">
+                <h3>₹ <%=totalReimbursedAmount%>
+                </h3>
+                <p>Amount Reimbursed This Month</p>
+              </div>
+            </li>
+            <li>
+
+              <div class="icon-container" style="background: var(--light-purple);">
+                <i class='bx bxs-dollar-circle' style="color: var(--purple);"></i>
+              </div>
+              <div class="text" style=" padding: 20px; text-align: center;">
+                <h3>₹ <%=pending_totalReimbursedAmount%>
+                </h3>
+                <p> Pending Amount To Reimburse</p>
+              </div>
+            </li>
+          </ul>
+
+          <div class="table-data">
+            <div class="order">
+              <div class="head">
+                <h3>Reimbursement Details</h3>
+                <i class='bx bx-chevron-down'></i>
+
+              </div>
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Reimbusted To</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Item</th>
+                    <th>Invoice Number</th>
+                    <th>Vendor/shop</th>
+                    <th>Paid By</th>
+                    <th>Status</th>
+
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="investorsTableBody"></tbody>
+                <form action="/add-reimbursement" method="post" enctype="multipart/form-data" >
+                  <tr>
+                    <td>
+                      <select class="form-control" id="employee" name="employee" required>
+
+                        <% for(var i=0; i< employees.length; i++){ %>
+                          <option value="<%=employees[i]._id%>">
+                            <%=employees[i].Name%>
+                          </option>
+                          <%}%>
+                      </select>
+                    </td>
+                    <!-- <td>
+                <input type="text" class="form-control" id="toWhomInput" placeholder="To Whom" />
+            </td> -->
+                    <td>
+                      <input type="date" class="form-control" id="dateInput" placeholder="Enter Date" name="Date" required/>
+                    </td>
+                    <td>
+                      <input type="number" class="form-control" id="amountInput" placeholder="Enter Amount"
+                        name="Amount" required/>
+                    </td>
+                    <td>
+                      <!-- <input type="text" class="form-control" id="reasonInput" placeholder="Enter Reason"
+                        name="Spent_on" required/> -->
+
+
+                      <select class="form-control" name="Spent_on" id="employee" required >
+                        <% for(var i=0; i< misc_types.length; i++){ %>
+                          <option value="<%=misc_types[i]%>">
+                            <%=misc_types[i]%>
+                          </option>
+                          <%}%>
+
+
+                      </select>
+
+                    </td>
+                    
+                    <td>
+                      <input type="text" class="form-control" id="reasonInput" placeholder="(Optional)"
+                        name="Invoice_number" />
+                    </td>
+                    <td>
+                      <input type="text" class="form-control" id="reasonInput" placeholder="(Optional)"
+                        name="Vendor" />
+                    </td>
+                    <td>
+                      <select class="form-control" id="employee" name="Paid_by" required >
+
+
+                        <option value="Sanjeev Sharma">Sanjeev Sharma</option>
+                        <option value="Company">Company</option>
+
+                      </select>
+                    </td>
+                    <td>
+                      <select class="form-control" id="employee" name="Status" required >
+
+
+                        <option value="Reimbursed">Reimbursed</option>
+                        <option value="Pending">Pending</option>
+
+                      </select>
+                    </td>
+                    <td>
+                      <input type="file" name="invoice" >
+                    </td>
+                    <td style="text-align: center;">
+                      <button type="submit" class="btn btn-info">Add</button>
+                    </td>
+                  </tr>
+                </form>
+              </table>
+
+
+
+
+            </div>
+          </div>
+
+
+
+
+          <!-- Recent Reimbursement -->
+
+          <div class="table-data">
+            <div class="order">
+              <div class="head">
+                <h3>Recent Reimbursements</h3>
+
+
+
+                <div class="filter">
+          <label for="Time"><strong> Filter:</strong></label>
+          <select id="Time" onchange="filterByDateRange('Particular')">
+            <!-- <option value="none">Select Filter</option> -->
+
+            <option value="1_month"  >1 Month</option>
+            <option value="3_months"  >3 Months</option>
+            <option value="6_months"  >6 Months</option>
+            <option value="1_year" >1 Year</option>
+            <option value="specific_date">Specific Date</option>
+          </select>
+          <!-- <button type="button" onclick="filterByDateRange('Particular')">Apply</button> -->
+        
+          <div id="specificDate" style="display: none;">
+            <label for="fromDate">From:</label>
+            <input type="date" id="fromDate" >
+            <label for="toDate">To:</label>
+            <input type="date" id="toDate"  >
+            <button type="button" onclick="filterByDateRange('Specific')">Apply</button>
+          </div>
+        </div>
+
+
+              </div>
+              <table style="border: 1px solid #dee2e6;">
+                <thead>
+                  <tr style="border: 1px solid #dee2e6;">
+                    <th>Reimbusted To</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Reason</th>
+                    <th>Invoice</th>
+                  </tr>
+                </thead>
+                <tbody id="R_table_body" >
+                  <% if (!reimbursement_data || reimbursement_data.length === 0) { %>
+                    <tr>
+                      <td></td>
+                      <td>No Recent Reimbursement Added</td>
+                    </tr>
+                  <% } else { %> 
+
+                  <% for(var i=0; i< reimbursement_data.length;i++){ %>
+                    <tr>
+                      <td>
+                        <%= reimbursement_data[i].employee.Name %>
+                      </td>
+                      <td>
+                        <%= formatDateToDDMMYYYY(reimbursement_data[i].Date) %>
+                      </td>
+                      <td>₹ <%= reimbursement_data[i].Amount %>
+                      </td>
+                      <td><%= reimbursement_data[i].Spent_on %>
+                      </td>
+                      
+                    </tr>
+                    <%}%>
+                    <%}%>
+
+                      </tr>
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+
+          <style>
+            .graphcont{
+          /* border: 2px solid red ; */
+          display: flex;
+          width: 100%;
+          /* flex-direction: row; */
+          align-items: center;
+          height: auto;
+          justify-content: space-around;
+          padding: 2%;
+            }
+            #qty-chart-container ,#chart-container,#employee-chart-container   {
+                      
+              
+                      width: 50%;
+                      /* border: 2px solid red; */
+                    
+                  }
+                  canvas{
+                    height: auto !important;
+                    width: 100% !important;
+          
+                  }
+          </style>
+    
+          <div class="graphcont">
+          <div id="chart-container">
+            <h4>Amount wise Data</h4>
+            <canvas id="dayWiseChart"></canvas>
+          </div>
+          
+          <div id="employee-chart-container">
+            <h4>Employee wise Data</h4>
+            <canvas id="employeeWiseChart"></canvas>
+          </div>
+        </div>
+          <script src="/javascripts/script.js"></script>
+
+
+
+
+          <div class="table-data">
+            <div class="order">
+              <div class="head">
+                <h3>Pending Reimbursements</h3>
+                
+
+              </div>
+              <table style="border: 1px solid #dee2e6;">
+                <thead>
+                  <tr style="border: 1px solid #dee2e6;">
+                    <th>Reimbusted To</th>
+                    <th>Date</th>
+                    <th>Amount</th>
+                    <th>Mark As Reimbursed</th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                  <% if (!pending_reimbursement_data || pending_reimbursement_data.length === 0) { %>
+                    <tr>
+                      <td></td>
+                      <td>No Pending Reimbursements</td>
+                    </tr>
+                  <% } else { %>
+
+                  <% for(var i=0; i< pending_reimbursement_data.length;i++){ %>
+                    <tr>
+                      <td>
+                        <%= pending_reimbursement_data[i].employee.Name %>
+                      </td>
+                      <td>
+                        <%= formatDateToDDMMYYYY(pending_reimbursement_data[i].Date) %>
+                      </td>
+                      <td>₹ <%= pending_reimbursement_data[i].Amount %>
+                      </td>
+                      <td>
+
+                        <form action="/mark-as-reimbursed" method="post">
+                          <input type="hidden" name="R_id" value="<%=pending_reimbursement_data[i]._id%>">
+                          <select name="Paid_by" id="">
+                            <option value="Sanjeev Sharma">Sanjeev Sharma</option>
+                            <option value="Company">Company</option>
+
+                          </select>
+                          <button type="submit" class="btn btn-info">Mark As Reimbursed</button>
+                        </form>
+
+                      </td>
+                    </tr>
+                    <%}%>
+                    <%}%>
+
+                      </tr>
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+       
+          <!-- <div id="chart-container">
+            <h3>Amount wise Data</h3>
+            <canvas id="dayWiseChart"></canvas>
+          </div>
+          
+          <div id="employee-chart-container">
+            <h3>Employee wise Data</h3>
+            <canvas id="employeeWiseChart"></canvas>
+          </div> -->
+          
+        </main>
+
+        <div id="invoiceImageContainer" style="display: none;">
+          <span class="closeButton" onclick="closeInvoice()">X</span>
+          <img id="invoiceImage" src="" alt="Invoice Image">
+      </div>
+      <script>
+        // Function to show the invoice image when clicked on the invoice icon
+        function showInvoice(invoiceUrl) {
+            document.getElementById('invoiceImage').src = invoiceUrl;
+            document.getElementById('invoiceImageContainer').style.display = 'block';
+        }
+    
+        // Function to close the invoice image
+        function closeInvoice() {
+            document.getElementById('invoiceImageContainer').style.display = 'none';
+        }
+    </script>
+
+        <!-- Bootstrap JS -->
+        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+      </section>
+
+
+
+     
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+      
+
+<script>
+   function formatDateToDDMMYYYY(date) {
+       
+       date = new Date(date)
+   const day = String(date.getDate()).padStart(2, '0');
+   const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+   const year = date.getFullYear();
+ 
+   return `${day}-${month}-${year}`;
+}
+
+function DateChange() {
+   var selectBox = document.getElementById("Time");
+   var specificDateDiv = document.getElementById("specificDate");
+ 
+   if (selectBox.value === "specific_date") {
+     specificDateDiv.style.display = "block";
+   } else {
+     specificDateDiv.style.display = "none";
+   }
+ }
+     function filterByDateRange(D_type) {
+
+
+if(document.querySelector('#Time').value=="specific_date"){
+
+ DateChange();
+ document.querySelector('#Time').value = "none";
+ return;
+}
+
+
+
+     var  today = new Date()
+       console.log('fanction chal gaya')
+   // Check if the dates are in the correct format
+   
+   
+   if(D_type == "Specific"){
+     console.log('specific tha chutiyon')
+     var from_d = document.querySelector('#fromDate').value;
+   var to_d = document.querySelector('#toDate').value;
+
+   // Check if from date and to date are provided
+   if (!from_d || !to_d) {
+       console.error('Both from date and to date are required.');
+       return;
+   }
+
+   var fromDate = new Date(from_d).setHours(0,0,0,0);
+   var toDate = new Date(to_d).setHours(0,0,0,0);
+
+  //  if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+  //      console.error('Invalid date format. Please enter dates in YYYY-MM-DD format.');
+  //      return;
+  //  }
+   if (fromDate > toDate) {
+       console.error('From date must be less than or equal to to date.');
+       return;
+   }
+
+ }else if (D_type == "Particular"){
+
+document.querySelector('#specificDate').style.display = 'none'
+
+   console.log('perticuler tha chutiyon')
+
+var sel = document.querySelector('#Time').value
+console.log(sel)
+if(sel=="1_month"){
+
+   var fromDate = new Date(today);
+fromDate.setDate(today.getDate() - 30);
+var toDate =today;
+// console.log(fromDate,toDate)
+ }else if(sel == "3_months"){
+
+
+   var fromDate = new Date(today);
+fromDate.setDate(today.getDate() - 90);
+var toDate =today;
+// console.log(fromDate,toDate)
+
+ }else if(sel == "6_months"){
+   var fromDate = new Date(today);
+fromDate.setDate(today.getDate() - 180);
+var toDate = today;
+ }else if(sel == "1_year"){
+   var fromDate = new Date(today);
+fromDate.setDate(today.getDate() - 365);
+var toDate = today;
+ }
+ }
+
+
+//  console.log(fromDate,toDate)
+  
+
+   // Check if from date is less than or equal to to date
+  
+   var lots = JSON.parse('<%- JSON.stringify(full_reimbursement) %>');
+
+   // Filter lots based on date range
+   var filteredLots = lots.filter(function (lot) {
+       var purchaseDate = new Date(lot.Date).setHours(0,0,0,0);
+       return purchaseDate >= fromDate && purchaseDate <= toDate;
+   });
+
+  //  console.log(filteredLots);
+  var dayWiseData = filteredLots;
+
+var inner_html= ``;
+
+for(var i=0; i < filteredLots.length; i++){
+  var path;
+if(filteredLots[i].Invoice){
+  path = filteredLots[i].Invoice
+path = path.replace('public/', '');
+console.log(path)
+}
+  
+ inner_html = inner_html + `<tr>
+             <td> ${filteredLots[i].employee.Name}  </td>
+            
+
+             <td>${formatDateToDDMMYYYY(filteredLots[i].Date)}
+               
+               
+             
+               </td>
+             <td>₹ ${filteredLots[i].Amount}  </td>
+             <td> ${filteredLots[i].Spent_on}  </td>
+             <td>
+              <i class='fas fa-file-invoice-dollar' onclick="showInvoice('${path}')" style="cursor:pointer;" ></i>   
+              
+              
+                    </td>
+           </tr>`
+
+}
+
+document.querySelector('#R_table_body').innerHTML = inner_html;
+
+// for charts 
+
+// for amaount chart 
+// removing previous canvas
+
+var canvasToRemove = document.getElementById('dayWiseChart')
+var canvasToRemove2 = document.getElementById('employeeWiseChart')
+
+canvasToRemove.parentNode.removeChild(canvasToRemove);
+canvasToRemove2.parentNode.removeChild(canvasToRemove2);
+
+
+const canvas1 = document.createElement('canvas');
+const canvas2 = document.createElement('canvas');
+
+canvas1.id = 'dayWiseChart';
+canvas2.id = 'employeeWiseChart';
+
+const parentDiv = document.getElementById('chart-container');
+const parentDiv2 = document.getElementById('employee-chart-container');
+
+parentDiv.appendChild(canvas1);
+parentDiv2.appendChild(canvas2);
+
+
+
+// canvas rendr-remove end
+
+const dataWithAmounts = dayWiseData.map(data => ({ date: moment(data.Date), amount: data.Amount }));
+
+// Sort the array based on dates
+dataWithAmounts.sort((a, b) => a.date - b.date);
+
+// Extract sorted dates and amounts arrays
+const dates = dataWithAmounts.map(item => item.date.format('MMM DD'));
+const amounts = dataWithAmounts.map(item => item.amount);
+
+
+  const amountWiseCtx = document.getElementById('dayWiseChart').getContext('2d');
+  const cv = document.getElementById('dayWiseChart')
+  let dayWiseChart = null;
+  // let amountWiseEmployeesChart = null; // Declare the chart variable outside the chart creation scope
+
+// Check if chart exists and destroy it before creating a new one
+amountWiseCtx.clearRect(0, 0, cv.width, cv.height);
+  dayWiseChart = new Chart(amountWiseCtx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Amount',
+        data: amounts,
+        backgroundColor: 'rgba(37, 37, 87, 1)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Amount'
+          },
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+
+// employees graph 
+
+const employeeData = dayWiseData.reduce((acc, curr) => {
+    if (!acc[curr.employee.Name]) {
+      acc[curr.employee.Name] = 0;
+    }
+    acc[curr.employee.Name] += curr.Amount;
+    return acc;
+  }, {});
+
+  const employeeNames = Object.keys(employeeData);
+  const employeeAmounts = Object.values(employeeData);
+
+  const employeeWiseCtx = document.getElementById('employeeWiseChart').getContext('2d');
+  const employeeWiseChart = new Chart(employeeWiseCtx, {
+    type: 'bar',
+    data: {
+      labels: employeeNames,
+      datasets: [{
+        label: 'Total Amount',
+        data: employeeAmounts,
+        backgroundColor: 'rgba(37, 37, 87, 1)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Employee'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Amount'
+          },
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+
+}
+
+
+</script>
+
+
+
+<script>
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+
+// Get today's date
+const today = new Date();
+
+// Format today's date in YYYY-MM-DD format
+const formattedToday = today.toISOString().split('T')[0];
+
+// Set the max attribute of all date inputs to today's date
+dateInputs.forEach(input => {
+    input.setAttribute('max', formattedToday);
+});
+</script>
+
+
+
+
+<!-- testing the graphs -->
+<style>
+#chart-container,#employee-chart-container   {
+    display: block;
+    box-sizing: border-box;
+    height: auto;
+    width: 70%;
+  
+}
+</style>
+
+
+
+
+
+
+<script>
+  const dayWiseData = JSON.parse('<%- JSON.stringify(full_reimbursement) %>');
+
+  // Process data for amount-wise chart
+  // const dates = dayWiseData.map(data => moment(data.Date).format('MMM DD')); // Format dates using moment.js
+  // const amounts = dayWiseData.map(data => data.Amount);
+
+  // const amountWiseCtx = document.getElementById('dayWiseChart').getContext('2d');
+  // const dayWiseChart = new Chart(amountWiseCtx, {
+  //   type: 'line',
+  //   data: {
+  //     labels: dates,
+  //     datasets: [{
+  //       label: 'Amount',
+  //       data: amounts,
+  //       backgroundColor: 'rgba(37, 37, 87, 1)',
+  //       borderColor: 'rgba(54, 162, 235, 1)',
+  //       borderWidth: 1
+  //     }]
+  //   },
+  //   options: {
+  //     scales: {
+  //       xAxes: [{
+  //         scaleLabel: {
+  //           display: true,
+  //           labelString: 'Date'
+  //         }
+  //       }],
+  //       yAxes: [{
+  //         scaleLabel: {
+  //           display: true,
+  //           labelString: 'Amount'
+  //         },
+  //         ticks: {
+  //           beginAtZero: true
+  //         }
+  //       }]
+  //     }
+  //   }
+  // });
+
+
+
+
+
+
+
+
+  // Process data for employee-wise chart
+  // const employeeData = dayWiseData.reduce((acc, curr) => {
+  //   if (!acc[curr.employee.Name]) {
+  //     acc[curr.employee.Name] = 0;
+  //   }
+  //   acc[curr.employee.Name] += curr.Amount;
+  //   return acc;
+  // }, {});
+
+  // const employeeNames = Object.keys(employeeData);
+  // const employeeAmounts = Object.values(employeeData);
+
+  // const employeeWiseCtx = document.getElementById('employeeWiseChart').getContext('2d');
+  // const employeeWiseChart = new Chart(employeeWiseCtx, {
+  //   type: 'bar',
+  //   data: {
+  //     labels: employeeNames,
+  //     datasets: [{
+  //       label: 'Total Amount',
+  //       data: employeeAmounts,
+  //       backgroundColor: 'rgba(37, 37, 87, 1)',
+  //       borderColor: 'rgba(255, 99, 132, 1)',
+  //       borderWidth: 1
+  //     }]
+  //   },
+  //   options: {
+  //     scales: {
+  //       xAxes: [{
+  //         scaleLabel: {
+  //           display: true,
+  //           labelString: 'Employee'
+  //         }
+  //       }],
+  //       yAxes: [{
+  //         scaleLabel: {
+  //           display: true,
+  //           labelString: 'Amount'
+  //         },
+  //         ticks: {
+  //           beginAtZero: true
+  //         }
+  //       }]
+  //     }
+  //   }
+  // });
+
+  filterByDateRange('Particular')
+</script>
+
+</body>
+
+</html>

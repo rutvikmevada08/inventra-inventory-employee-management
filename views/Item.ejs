@@ -1,0 +1,946 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link href="https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.0/css/boxicons.min.css" />
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  <title>Inventory</title>
+</head>
+<style>
+   button {
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .container {
+    position: relative;
+    width: 100%;
+  }
+
+  .right-aligned {
+    position: absolute;
+    top: -22px;
+    right: 0;
+  }
+
+  .right-aligned button {
+    border-radius: 5px;
+  }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #ccc;
+  }
+
+  .close-icon:hover {
+    color: #555;
+  }
+
+  .form-container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+  }
+
+  .form-container.active {
+    display: block;
+  }
+
+
+   /* item Form */
+  #itemForm {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    width: 50%;
+  }
+
+  #itemForm h2 {
+    font-family: Montserrat;
+    font-weight: 700;
+    color: #0056b3;
+    margin-bottom: 20px;
+  }
+
+  #itemForm label {
+    font-weight: 600;
+  }
+
+  #itemForm input[type="text"],
+  #itemForm input[type="email"],
+  #itemForm input[type="tel"] {
+    width: calc(100% - 40px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  #itemForm input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  #itemForm input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+
+</style>
+<body>
+  <script src='https://kit.fontawesome.com/a076d05399.js' crossorigin='anonymous'></script>
+
+  <%- include('./sidenavbar.ejs') %>
+  <%- include('./alert_msg.ejs') %>
+
+  <% let amount_month=0 %>
+  <%
+  function formatDateToDDMMYYYY(date) {
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+  
+    return `${day}-${month}-${year}`;
+ }
+ %>
+    <!-- Add Product Section -->
+    <section id="content">
+      <nav>
+        <i class="bx bx-transfer-alt"></i>
+        <div class="container">
+          <div class="right-aligned">
+            <button onclick="toggleForm('itemForm')">Add Item Type</button>
+            <button onclick="toggleLotSection()">Add Lot</button>
+
+          </div>
+          </div>
+      </nav>
+
+      <div class="overlay" onclick="closeForms()"></div>
+
+      <div id="itemForm" class="form-container">
+        <h2 style="font-family: Montserrat; font-weight: 700; color: #0056b3;">Add Item</h2>
+        <span class="close-icon" onclick="closeForm('itemForm')"><i class='bx bx-x'></i></span>
+      
+      
+        <form action="/add-item-types" method="post" > 
+          <label for="itemName">Name:</label><br>
+          <input type="text" id="itemName" name="Type_name" style="width: 100%;" required><br>
+          <button type="submit" id="emp_submit">Add</button>
+        </form>
+
+
+      </div>
+
+
+
+
+
+      <form action="/save-lot" method="post" id="addProductContainer" enctype="multipart/form-data"  >
+        <main>
+          <div class="head-title">
+            <div class="left">
+              <h1>Add Lot</h1>
+              <ul class="breadcrumb">
+                <li>
+                  <a href="#">Add Lot</a>
+                </li>
+                <li><i class="bx bx-chevron-right"></i></li>
+                <li>
+                  <a class="active" href="#">Dashboard</a>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <ul class="box-info">
+            <li>
+              <i class='bx bxs-cart-alt'></i>
+              <span class="text">
+                <h3><%=lots.length%></h3>
+                <p>Total Lots This Month</p>
+              </span>
+            </li>
+            
+            <!-- <li>
+              <i class='bx bxs-shopping-bag'></i>
+              <span class="text">
+                <h3>2</h3>
+                <p>Received Order</p>
+              </span>
+            </li> -->
+
+            <% for(var i=0; i < lots.length; i++){ %>
+            
+
+           <% } %>
+          <% let pending_amount = 0 %>
+           <% for(var i=0; i < lots.length; i++){ %>
+            <% amount_month = amount_month+lots[i].Total_payable %>
+
+          <% } %>
+
+
+          <% for(var i=0; i < full_lots.length; i++){ %>
+            <% if(full_lots[i].Total_payable != full_lots[i].Total_paid ){ %>
+              <% pending_amount = pending_amount + (full_lots[i].Total_payable - full_lots[i].Total_paid) %>
+
+
+
+            <%}%>
+
+
+          <% } %>
+           <li>
+              <i class='bx bx-rupee'></i>
+  
+              <span class="text">
+                <h3><%= amount_month %></h3>
+                <p>Total Amount Spent This Month</p>
+              </span>
+            </li>
+            <li>
+              <!-- <i class="bx bx-cart"></i> -->
+              <i class="bx bx-coin"></i>
+              <span class="text">
+                <h3><%= pending_amount %></h3>
+                <p>Pending Amont to be Paid</p>
+              </span>
+            </li>
+          </ul>
+        </main>
+
+        <main style="margin-top: -100px">
+          <div id="lotSection" style="display: none;">
+          <div class="table-data">
+            <div class="todo-section" id="invoiceSection">
+              <div class="head">
+                <h3>Invoice </h3>
+              </div>
+              <ul class="todo-list">
+                <li>
+                  <table class="report-table" id="invoiceTable">
+                    <tr>
+                      <td style="font-weight: 500">Invoice Number</td>
+                      <td>
+                        <input type="text" class="form-control" id="In" name="Invoice_number" required/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight: 500">vendor</td>
+                      <td>
+                        <select class="form-control" id="vendor" name="Vendor" required>
+                          <% for(var i=0; i< vendors.length; i++){ %>
+                            <option value="<%=vendors[i]._id%>">
+                              <%=vendors[i].Business_name%>
+                            </option>
+                            <%}%>
+                        </select>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style="font-weight: 500">Lot Type</td>
+                      <td>
+                        <select class="form-control" id="vendor" name="Lot_type" required>
+                          <% for(var i=0; i< Service_types.length; i++){ %>
+                            <option value="<%=Service_types[i]%>">
+                              <%=Service_types[i]%>
+                            </option>
+                            <%}%>
+                        </select>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style="font-weight: 500">Paid By</td>
+                      <td>
+                        <select class="form-control" id="vendor" name="Paid_by" required>
+                         
+                            <option value="Sanjeev Sharma" >Sanjeev Sharma
+                             
+                            </option>
+                            <option value="Company" >Company
+                             
+                            </option>
+                            
+                        </select>
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td style="font-weight: 500">Purchase date</td>
+                      <td>
+                        <input type="date" class="form-control" id="purchaseDate" name="Purchase_date" required/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight: 500">Total Payable</td>
+                      <td>
+                        <input type="number" class="form-control" id="totalAmount" name="Total_payable" required/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight: 500">Total paid till now</td>
+                      <td>
+                        <input type="number" class="form-control" id="totalPaid" name="Total_paid" required/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight: 500">Invoice</td>
+                      <td>
+                        <input type="file" class="form-control" id="totalPaid" name="invoice" required/>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight: 500">Description </td>
+                      <td>
+                        <input type="text" name="Description" class="form-control" id="paidornot" placeholder="(Optional)" />
+                      </td>
+                    </tr>
+                    <tr>
+                      <td style="font-weight: 500">Item Received? </td>
+                      <td>
+                        <input type="checkbox" name="Paid" id="paidornot"/>
+                      </td>
+                    </tr>
+                  </table>
+                </li>
+              </ul>
+              <!-- <div class="button-container">
+            <button class="editBtn" id="invoiceEditBtn">Edit</button>
+            <button class="doneBtn" id="invoiceDoneBtn" disabled>Done</button>
+          </div> -->
+            </div>
+          </div>
+       
+
+        <!-- product detail -->
+
+        <div class="container-fluid bg-2 text-center" style="font-family: var(--poppins); margin-top: -40px">
+          <br />
+          <div class="row">
+            <div class="col-sm-12" style="overflow-x: auto;margin-top: 38px;">
+              <table class="table table-bordered">
+                <thead>
+                  <tr>
+                    <th>Product Name</th>
+                    <th>Cost Per Unit</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="productsTableBody"></tbody>
+                <tr>
+                  <td>
+                    <select class="form-control" id="itemNameInput" >
+
+                      <% for(var i=0; i< item_types.length; i++){ %>
+                        <option value="<%=item_types[i]._id%>">
+                          <%=item_types[i].Type_name %>
+                            <%}%>
+
+
+
+                    </select>
+                  </td>
+                  <td>
+                    <input type="number" class="form-control" id="priceInput" placeholder="Enter Price"
+                      oninput="calculateAmount()" />
+                  </td>
+                  <td>
+                    <input type="number" class="form-control" id="quantityInput" placeholder="Enter Qty"
+                      oninput="calculateAmount()" />
+                  </td>
+                  <td>
+                    <input type="number" class="form-control" id="totalInput" placeholder="Enter Total"  />
+                  </td>
+                  <td>
+                    <button type="button" class="btn btn-info" onclick="addProduct()">
+                      Add
+                    </button>
+                  </td>
+                </tr>
+              </table>
+            </div>
+            <div class="col-sm-12">
+              <div class="form-group" align="left">
+                <input type="hidden" id="item_count" name="item_quantity" value="" />
+                <button type="submit" class="btn btn-info">Complete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </form>
+
+
+   <!-- Recent Purchase -->
+
+   <div class="table-data">
+    <div class="order">
+      <div class="head">
+        <h3>Recent Purchase</h3>
+        <div class="filter">
+          <label for="Time"><strong> Filter:</strong></label>
+          <select id="Time" onchange="filterByDateRange('Particular')">
+          
+
+            <option value="1_month"  >1 Month</option>
+            <option value="3_months"  >3 Months</option>
+            <option value="6_months"  >6 Months</option>
+            <option value="1_year" >1 Year</option>
+            <option value="specific_date">Specific Date</option>
+          </select>
+         
+          
+        
+          <div id="specificDate" style="display: none;">
+            <label for="fromDate">From:</label>
+            <input type="date" id="fromDate" >
+            <label for="toDate">To:</label>
+            <input type="date" id="toDate"  >
+            <button type="button" onclick="filterByDateRange('Specific')">Apply</button>
+          </div>
+        </div>
+
+      </div>
+
+
+      <table style="border: 1px solid #dee2e6;">
+        <thead>
+          <tr style="border: 1px solid #dee2e6;">
+            <th>vendor</th>
+            <th>Item Quantity</th>
+            <th>Date</th>
+            <th>Amount</th>
+            <th>Invoice</th>
+
+          </tr>
+        </thead>
+        <tbody id="R_table_body" >
+         
+          <% for(var i=0; i< lots.length;i++){ %>
+            <tr>
+              <td> <%= lots[i].Vendor.Business_name %> </td>
+              <%
+              var qt = 0 ;
+              for(var k=0; k< lots[i].Items.length; k++){
+              qt = qt+lots[i].Items[k].Quantity
+              
+              }
+              %>
+              <td> <%=qt%> </td>
+
+              <td><%= formatDateToDDMMYYYY(lots[i].Purchase_date) %>  </td>
+              <td>₹ <%= lots[i].Total_payable %> </td>
+              
+            </tr>
+            <%}%>
+         
+         
+         
+
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<style>
+  .graphcont{
+/* border: 2px solid red ; */
+display: flex;
+width: 100%;
+/* flex-direction: row; */
+align-items: center;
+height: auto;
+justify-content: space-around;
+padding: 2%;
+  }
+  #qty-chart-container ,#chart-container,#employee-chart-container   {
+            
+    
+            width: 50%;
+            /* border: 2px solid red; */
+          
+        }
+        canvas{
+          height: auto !important;
+          width: 100% !important;
+
+        }
+</style>
+
+  <div class="graphcont">
+  <div id="chart-container">
+    <h4>Amount wise Data</h4>
+    <canvas id="dayWiseChart"></canvas>
+  </div>
+  <div id="qty-chart-container">
+    <h4>Quantity wise Data</h4>
+    <canvas id="qtyWiseChart"></canvas>
+  </div>
+  
+</div>
+<div class="graphcont">
+<div id="employee-chart-container">
+  <h4>Vendor wise Data</h4>
+  <canvas id="employeeWiseChart"></canvas>
+</div>
+
+</div>
+</main>
+<div id="invoiceImageContainer" style="display: none;">
+  <span class="closeButton" onclick="closeInvoice()">X</span>
+  <img id="invoiceImage" src="" alt="Invoice Image">
+</div>
+<script>
+// Function to show the invoice image when clicked on the invoice icon
+function showInvoice(invoiceUrl) {
+    document.getElementById('invoiceImage').src = invoiceUrl;
+    document.getElementById('invoiceImageContainer').style.display = 'block';
+}
+
+// Function to close the invoice image
+function closeInvoice() {
+    document.getElementById('invoiceImageContainer').style.display = 'none';
+}
+</script>
+      <!-- Bootstrap JS -->
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+      
+    </section>
+
+    <script src="/javascripts/script.js"></script>
+
+    <script>
+      function hideForm() {
+        document.getElementById('addProductContainer').style.display = 'none';
+      }
+    </script>
+    <script>
+      function formatDateToDDMMYYYY(date) {
+       
+        date = new Date(date)
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = date.getFullYear();
+  
+    return `${day}-${month}-${year}`;
+ }
+
+ function DateChange() {
+    var selectBox = document.getElementById("Time");
+    var specificDateDiv = document.getElementById("specificDate");
+  
+    if (selectBox.value === "specific_date") {
+      specificDateDiv.style.display = "block";
+    } else {
+      specificDateDiv.style.display = "none";
+    }
+  }
+      function filterByDateRange(D_type) {
+
+
+if(document.querySelector('#Time').value=="specific_date"){
+
+  DateChange();
+  document.querySelector('#Time').value = "none";
+  return;
+}
+
+
+
+      var  today = new Date()
+        console.log('fanction chal gaya')
+    // Check if the dates are in the correct format
+    
+    
+    if(D_type == "Specific"){
+      // console.log('specific tha chutiyon')
+      var from_d = document.querySelector('#fromDate').value;
+    var to_d = document.querySelector('#toDate').value;
+
+    // Check if from date and to date are provided
+    if (!from_d || !to_d) {
+        console.error('Both from date and to date are required.');
+        return;
+    }
+
+    var fromDate = new Date(from_d).setHours(0,0,0,0);
+    var toDate = new Date(to_d).setHours(0,0,0,0);
+
+    // if (isNaN(fromDate.getTime()) || isNaN(toDate.getTime())) {
+    //     console.error('Invalid date format. Please enter dates in YYYY-MM-DD format.');
+    //     return;
+    // }
+    if (fromDate > toDate) {
+        console.error('From date must be less than or equal to to date.');
+        return;
+    }
+
+  }else if (D_type == "Particular"){
+
+document.querySelector('#specificDate').style.display = 'none'
+
+    console.log('perticuler tha chutiyon')
+ 
+var sel = document.querySelector('#Time').value
+console.log(sel)
+if(sel=="1_month"){
+
+    var fromDate = new Date(today);
+fromDate.setDate(today.getDate() - 30);
+var toDate =today;
+console.log(fromDate,toDate)
+  }else if(sel == "3_months"){
+
+
+    var fromDate = new Date(today);
+fromDate.setDate(today.getDate() - 90);
+var toDate =today;
+console.log(fromDate,toDate)
+
+  }else if(sel == "6_months"){
+    var fromDate = new Date(today);
+fromDate.setDate(today.getDate() - 180);
+var toDate = today;
+  }else if(sel == "1_year"){
+    var fromDate = new Date(today);
+fromDate.setDate(today.getDate() - 365);
+var toDate = today;
+  }
+  }
+
+
+  console.log(fromDate,toDate)
+  let dayWiseData;
+  
+
+    // Check if from date is less than or equal to to date
+   
+    var lots = JSON.parse('<%- JSON.stringify(full_lots) %>');
+
+    // Filter lots based on date range
+    var filteredLots = lots.filter(function (lot) {
+        var purchaseDate = new Date(lot.Purchase_date).setHours(0,0,0,0);
+        return purchaseDate >= fromDate && purchaseDate <= toDate;
+    });
+
+    console.log(filteredLots);
+
+     dayWiseData = filteredLots;
+
+var inner_html= ``;
+
+for(var i=0; i < filteredLots.length; i++){
+  var path = filteredLots[i].Invoice
+path = path.replace('public/', '');
+console.log(path)
+  var qt = 0 ;
+              for(var k=0; k< lots[i].Items.length; k++){
+              qt = qt+lots[i].Items[k].Quantity
+              console.log(qt+lots[i].Items)
+              }
+
+  inner_html = inner_html + `<tr>
+              <td> ${filteredLots[i].Vendor.Business_name}  </td>
+              <td> ${qt}  </td>
+
+              <td>${formatDateToDDMMYYYY(filteredLots[i].Purchase_date)}
+                
+                
+              
+                </td>
+              <td>₹ ${filteredLots[i].Total_payable}  </td>
+              <td>
+              <i class='fas fa-file-invoice-dollar' onclick="showInvoice('${path}')" style="cursor:pointer;" ></i>   
+              
+              
+                    </td>
+            </tr>`
+
+}
+
+document.querySelector('#R_table_body').innerHTML = inner_html;
+
+
+
+// for charts 
+
+// for amaount chart 
+// removing previous canvas
+
+var canvasToRemove = document.getElementById('dayWiseChart')
+var canvasToRemove2 = document.getElementById('employeeWiseChart')
+var canvasToRemove3 = document.getElementById('qtyWiseChart')
+
+
+canvasToRemove.parentNode.removeChild(canvasToRemove);
+canvasToRemove2.parentNode.removeChild(canvasToRemove2);
+canvasToRemove3.parentNode.removeChild(canvasToRemove3);
+
+
+const canvas1 = document.createElement('canvas');
+const canvas2 = document.createElement('canvas');
+const canvas3 = document.createElement('canvas');
+
+
+canvas1.id = 'dayWiseChart';
+canvas2.id = 'employeeWiseChart';
+canvas3.id = 'qtyWiseChart';
+
+
+const parentDiv = document.getElementById('chart-container');
+const parentDiv2 = document.getElementById('employee-chart-container');
+const parentDiv3 = document.getElementById('qty-chart-container');
+
+
+parentDiv.appendChild(canvas1);
+parentDiv2.appendChild(canvas2);
+parentDiv3.appendChild(canvas3);
+
+
+
+// canvas rendr-remove end
+
+const dataWithAmounts = dayWiseData.map(data => ({ date: moment(data.Purchase_date), amount: data.Total_payable }));
+// console.log(dayWiseData)
+// Sort the array based on dates
+dataWithAmounts.sort((a, b) => a.date - b.date);
+
+// Extract sorted dates and amounts arrays
+const dates = dataWithAmounts.map(item => item.date.format('MMM DD'));
+const amounts = dataWithAmounts.map(item => item.amount);
+
+
+// const amounts = dataWithAmounts.map(item => item.amount);
+
+
+
+
+// {
+//         label: 'Quantity',
+//         data: qtity,
+//         backgroundColor: 'rgba(3, 37, 8, 1)',
+//         borderColor: 'rgba(5, 1, 23, 1)',
+//         borderWidth: 1
+//       }
+
+
+
+
+
+  const amountWiseCtx = document.getElementById('dayWiseChart').getContext('2d');
+  const cv = document.getElementById('dayWiseChart')
+  let dayWiseChart = null;
+  // let amountWiseEmployeesChart = null; // Declare the chart variable outside the chart creation scope
+
+// Check if chart exists and destroy it before creating a new one
+amountWiseCtx.clearRect(0, 0, cv.width, cv.height);
+  dayWiseChart = new Chart(amountWiseCtx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Amount',
+        data: amounts,
+        backgroundColor: 'rgba(37, 37, 87, 1)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }
+      ]
+    },
+    options: {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Amount'
+          },  
+          ticks: {
+            beginAtZero: true,
+            
+          }
+        }]
+      }
+    }
+  });
+
+// quantity graph
+const qtity = dayWiseData.map(data => data.Items.reduce((acc, item) => acc + item.Quantity, 0));
+
+
+const qtyWiseCtx = document.getElementById('qtyWiseChart').getContext('2d');
+  const cvq = document.getElementById('qtyWiseChart')
+  let qtyWiseChart = null;
+  // let amountWiseEmployeesChart = null; // Declare the chart variable outside the chart creation scope
+
+// Check if chart exists and destroy it before creating a new one
+qtyWiseCtx.clearRect(0, 0, cvq.width, cvq.height);
+  dayWiseChart = new Chart(qtyWiseCtx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Quantity',
+        data: qtity,
+        backgroundColor: 'rgba(37, 37, 87, 1)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }
+      ]
+    },
+    options: {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Amount'
+          },  
+          ticks: {
+            beginAtZero: true,
+            
+          }
+        }]
+      }
+    }
+  });
+
+
+
+// employees graph 
+
+const employeeData = dayWiseData.reduce((acc, curr) => {
+    if (!acc[curr.Vendor.Business_name]) {
+      acc[curr.Vendor.Business_name] = 0;
+    }
+    acc[curr.Vendor.Business_name] += curr.Total_payable;
+    return acc;
+  }, {});
+
+  const employeeNames = Object.keys(employeeData);
+  const employeeAmounts = Object.values(employeeData);
+
+  const employeeWiseCtx = document.getElementById('employeeWiseChart').getContext('2d');
+  const employeeWiseChart = new Chart(employeeWiseCtx, {
+    type: 'bar',
+    data: {
+      labels: employeeNames,
+      datasets: [{
+        label: 'Total Amount',
+        data: employeeAmounts,
+        backgroundColor: 'rgba(37, 37, 87, 1)',
+        borderColor: 'rgba(255, 99, 132, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Employee'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Amount'
+          },
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+
+
+
+
+
+
+
+
+}
+
+filterByDateRange('Particular')
+      
+      </script>
+      <script>
+        const dateInputs = document.querySelectorAll('input[type="date"]');
+      
+      // Get today's date
+      const today = new Date();
+      
+      // Format today's date in YYYY-MM-DD format
+      const formattedToday = today.toISOString().split('T')[0];
+      
+      // Set the max attribute of all date inputs to today's date
+      dateInputs.forEach(input => {
+          input.setAttribute('max', formattedToday);
+      });
+      </script>
+     
+</body>
+</html>

@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="/stylesheets/style.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  <title>Employee Specific</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    .navbar {
+      background-color: #f8f9fa;
+      overflow: hidden;
+    }
+
+    .navbar a {
+      float: left;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+    }
+
+    .navbar a:hover {
+      background-color: #333;
+    }
+
+    .profile {
+      float: right;
+      display: block;
+      color: white;
+      text-align: center;
+      padding: 14px 20px;
+      text-decoration: none;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .dropdown-content {
+      display: none;
+      position: fixed;
+      background-color: #007bff;
+      min-width: 110px;
+      z-index: 9999;
+      right: 0;
+    }
+
+    .dropdown-content a {
+      color: white;
+      padding: 10px 32px;
+      text-decoration: none;
+      display: block;
+      text-align: left;
+    }
+
+    .dropdown-content a:hover {
+      background-color: #0056b3;
+    }
+
+    .profile:hover .dropdown-content {
+      display: block;
+    }
+
+    button {
+      padding: 10px 20px;
+      margin-right: 10px;
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    .right-aligned {
+      position: absolute;
+      top: 4px;
+      right: 38px;
+    }
+
+    .right-aligned button {
+      border-radius: 5px;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .close-icon {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      cursor: pointer;
+      font-size: 20px;
+      color: #333 !important;
+    }
+
+    .close-icon:hover {
+      color: #555;
+    }
+
+    .form-container {
+      display: none;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 60%;
+      transform: translate(-50%, -50%);
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      z-index: 1000;
+    }
+
+    .form-container.active {
+      display: block;
+    }
+
+    /* employee Form */
+    #reimbursementForm {
+      background-color: #f9f9f9;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #reimbursementForm h2 {
+      font-family: Montserrat;
+      font-weight: 700;
+      color: #0056b3;
+      margin-bottom: 20px;
+    }
+
+    #reimbursementForm label {
+      font-weight: 600;
+    }
+
+    #reimbursementForm input[type="text"],
+    #reimbursementForm input[type="date"],
+    #reimbursementForm input[type="text"] {
+      width: calc(100% - 40px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    #reimbursementForm input[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #reimbursementForm input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    /* Vendor Form */
+    #requestItemForm {
+      background-color: #f9f9f9;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #requestItemForm h2 {
+      font-family: Montserrat;
+      font-weight: 700;
+      color: #0056b3;
+      margin-bottom: 20px;
+    }
+
+    #requestItemForm label {
+      font-weight: 600;
+    }
+
+    #requestItemForm input[type="text"],
+    #requestItemForm input[type="number"] {
+      width: calc(100% - 40px);
+      padding: 10px;
+      margin-bottom: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+
+    #requestItemForm input[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #requestItemForm input[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+
+    .table-data {
+      /* border: 2px solid #333; */
+      background-color: white;
+      margin-bottom: 50px;
+      padding: 20px;
+      border-radius: 10px;
+    }
+    h3{
+      margin-top: -20px;
+    }
+
+    .table-data .order {
+      /* border-bottom: 1px solid #ccc; */
+      margin-bottom: 20px;
+      padding-bottom: 20px;
+    }
+
+    .table-data table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .table-data th,
+    .table-data td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+
+    .table-data th {
+      background-color: #f8f9fa;
+      font-weight: bold;
+    }
+
+    .table-data tbody tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    .table-data tbody tr:hover {
+      background-color: #e2e2e2;
+    }
+  </style>
+</head>
+
+<body>
+  <%- include('./alert_msg.ejs') %>
+    <% function formatDateToDDMMYYYY(date) { const day=String(date.getDate()).padStart(2, '0' ); const
+      month=String(date.getMonth() + 1).padStart(2, '0' ); 
+      const year=date.getFullYear();
+      return `${day}-${month}-${year}`; } %>
+      <div class="navbar">
+        <div class="right-aligned">
+          <button onclick="toggleForm('reimbursementForm')">
+            Request Reimbursement
+          </button>
+          <button onclick="toggleForm('requestItemForm')">Request Item</button>
+        </div>
+        <div class="profile">
+          <i class="fa fa-user" style="color: #0056b3"></i>
+          <div class="dropdown-content">
+            <a href="#" style="color: white;">Profile</a><br>
+            <a href="#" style="color: white">Logout</a>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="overlay" onclick="closeForms()"></div>
+
+      <div id="reimbursementForm" class="form-container">
+        <h2 style="font-family: Montserrat; font-weight: 700; color: #0056b3">
+          Request Reimbursement
+        </h2>
+        <span class="close-icon" onclick="closeForm('reimbursementForm')">x</span>
+        <form action="/make-re-request" method="post">
+          <label for="cost">Shop/vendor/business Name:</label><br />
+          <input type="text" id="cost" name="Vendor" style="width: 100%" placeholder="(Optional)" /><br />
+
+          <label for="cost">Invoice Number(If you have any GST Bill):</label><br />
+          <input type="text" id="cost" name="Invoice_number" style="width: 100%" /><br />
+
+          <label for="cost">Amount:</label><br />
+          <input type="text" id="cost" name="amount" style="width: 100%" required /><br />
+          <label for="date">Date:</label><br />
+          <input type="date" id="date" name="date" style="width: 100%" required /><br />
+          <label for="reason">Item/service (What item/service did you paid for (for company's
+            side)?:</label><br />
+          <!-- <input
+          type="text"
+          id="reason"
+          name="reason"
+          style="width: 100%"
+       required />
+        -->
+
+          <select id="itemType" name="reason" style="
+            width: calc(100% - 5px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+          " required>
+            <% for(var i=0; i< misc_types.length; i++){ %>
+              <option value="<%=misc_types[i]%>">
+                <%=misc_types[i]%>
+              </option>
+              <%}%>
+          </select>
+          <label for="reason" style="color: red; font-weight: 100; ">*Plese select Peripheral as Item if You are
+            confused !!</label>
+
+          <br /><br />
+          <input type="hidden" name="employee_id" value="<%=employee._id%>" />
+          <input type="submit" value="Submit" id="reimbursement_submit" />
+        </form>
+      </div>
+
+      <div id="requestItemForm" class="form-container">
+        <h2 style="font-family: Montserrat; font-weight: 700; color: #0056b3">
+          Request Item
+        </h2>
+        <span class="close-icon" onclick="closeForm('requestItemForm')">x</span>
+        <form action="/make-item-req" method="post">
+          <label for="itemType">Item Type:</label><br />
+          <select id="itemType" name="item" style="
+            width: calc(100% - 5px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+          " required>
+            <% for(var i=0; i< Item_types.length; i++){ %>
+              <option value="<%=Item_types[i]._id%>">
+                <%=Item_types[i].Type_name%>
+              </option>
+              <%}%>
+          </select><br/>
+          <label for="when">Quantity:</label><br />
+          <input type="number" id="quantity" name="quantity" style="
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+          " required />
+          <br /><br />
+          <label for="when">Reason:</label><br />
+          <input type="text" id="quantity" name="reason" style="
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+          " required /><br/><br/>
+          <input type="hidden" name="employee_id" value="<%=employee._id%>" />
+
+          <input type="submit" value="Submit" id="item_submit" style="
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-size: 16px;
+          " />
+        </form>
+      </div>
+
+      <section id="content" style="left: 0 !important; width: calc(100% + 0%) !important">
+        <main>
+          <div class="table-data">
+            <div class="order">
+              <div class="head">
+                <h3>Reimbursement Requests</h3>
+                <i class="bx bx-chevron-down"></i>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Material Type</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for (let i=0; i < reim_requests.length; i++) { %>
+                    <tr>
+                     
+                      <td>
+                        <%= reim_requests[i].reason %>
+                      </td>
+                      <td>
+                        <%= reim_requests[i].requested_amount %>
+                      </td>
+                      <td>
+                        <%= formatDateToDDMMYYYY(reim_requests[i].Date) %>
+                      </td>
+                      <td>
+                        <span class="status completed">Not Accepted Yet</span>
+                      </td>
+                      <td><i class="bx bx-show"></i></td>
+                    </tr>
+
+                    <% } %>
+                      <% for (let i=0; i < pending_reims.length; i++) { %>
+                        <tr>
+                          <td>
+                            <%= pending_reims[i].Spent_on %>
+                          </td>
+                          <td>
+                            <%= pending_reims[i].Amount %>
+                          </td>
+                          <td>
+                            <%= formatDateToDDMMYYYY(pending_reims[i].Date) %>
+
+                            
+                          </td>
+                          <td><span class="status process">In Process</span></td>
+                          <!-- <td><i class="bx bx-show"></i></td> -->
+                        </tr>
+
+                        <% } %>
+
+                          <!-- <tr>
+                  <td>50</td>
+                  <td>28-02-2024</td>
+                  <td><span class="status process">In Process</span></td>
+                  <td><i class="bx bx-show"></i></td>
+                </tr> -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="table-data">
+            <div class="order">
+              <div class="head">
+                <h3>Item Requests</h3>
+                <i class="bx bx-chevron-down"></i>
+              </div>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Item Name</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% for(var i=0; i< item_reqs.length; i++){ %>
+
+                    <tr>
+                      <td>
+                        <%=item_reqs[i].item.Type_name%>
+                      </td>
+                      <td>
+                        <%= formatDateToDDMMYYYY(item_reqs[i].Date)%>
+                      </td>
+                      <td>
+                        <span class="status completed">
+                          <%=item_reqs[i].Status%>
+                        </span>
+                      </td>
+                      <!-- <td><i class="bx bx-show"></i></td> -->
+                    </tr>
+
+                    <%}%>
+
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </main>
+      </section>
+
+      <!-- <form action="/upload-invoice" method="post" enctype="multipart/form-data">
+<input type="text" name="name">
+<input type="text" name="type">
+      <input type="file" name="invoice" id="">
+      <button type="submit">upload</button>
+    </form> -->
+
+      <script src="/javascripts/script.js"></script>
+</body>
+
+</html>

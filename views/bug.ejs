@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sheets</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/boxicons/2.0.7/css/boxicons.min.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        #content {
+            background-color: #f9f9f9;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        form {
+            margin-bottom: 30px;
+        }
+        h1 {
+            color: #008080;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        input[type="date"] {
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"]:hover {
+            background-color: #3C91E6;
+        }
+    </style>
+</head>
+<body>
+
+  <%- include('./sidenavbar.ejs') %>
+  <%- include('./alert_msg.ejs') %>
+
+    <section id="content">
+        <nav>
+            <i class='bx bx-transfer-alt'></i>
+        </nav>
+        <div id="report">
+            <section class="error">
+                <div class="container">
+                    <form action="/get-fuel-data-xl" method="post">
+                        <h1>Get Fuel Information.</h1>
+                        <input type="date" name="fromDate" placeholder="from" required >
+                        <input type="date" name="toDate" placeholder="to" required >
+                        <button type="submit">Get XLSX</button>
+                    </form>
+                    <form action="/get-reimbursement-data-xl" method="post">
+                        <h1>Get Reimbursement Information.</h1>
+                        <input type="date" name="fromDate" placeholder="from" required >
+                        <input type="date" name="toDate" placeholder="to" required >
+                        <button type="submit">Get XLSX</button>
+                    </form>
+                    <form action="/get-inventory-data-xl" method="post">
+                        <h1>Get Inventory Information.</h1>
+                        <input type="date" name="from_date" placeholder="from" required >
+                        <input type="date" name="to_date" placeholder="to" required >
+                        <button type="submit">Get XLSX</button>
+                    </form>
+                    <form action="/get-investor-sheet-xl" method="post">
+                        <h1>Get Investor Sheet</h1>
+                        <input type="date" name="from_date" placeholder="from" required  >
+                        <input type="date" name="to_date" placeholder="to" required >
+                        <button type="submit">Get XLSX</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </section>
+
+    <!-- Bootstrap JS -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="/javascripts/script.js"></script>
+</body>
+</html>

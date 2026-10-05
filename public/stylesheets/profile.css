@@ -1,0 +1,64 @@
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f4f4f9;
+    color: #333;
+}
+.section {
+    margin-bottom: 20px;
+    padding: 10px;
+    background: #ffffff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    width: 40%;
+}
+.section-heading {
+    font-size: 22px;
+    font-weight: 600;
+    color: #5c67f2;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #e0e0e0;
+    margin-bottom: 15px;
+}
+.field {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+.field label {
+    color: #555;
+    flex: 0 0 150px;
+}
+input[type="password"], input[type="text"] {
+    border: none;
+    background: #e7e7ee;
+    padding: 8px;
+    border-radius: 4px;
+    width: 200px;
+}
+.edit-icon, .eye-icon {
+    float: right;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 10px;
+    color: #5c67f2;
+}
+.field {
+    position: relative;
+}
+
+.eye-icon {
+    position: absolute;
+    left: 366px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+}
+.edit-icon:hover, .eye-icon:hover {
+    color: #4038f0;
+}
+input[type="password"]:focus, input[type="text"]:focus {
+    outline: none;
+    box-shadow: 0 0 5px rgba(92, 102, 242, 0.5);
+}

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="UTF-8">
+    <title> Executive Login </title>
+    <link rel="stylesheet" href="/stylesheets/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="cache-control" content="private, max-age=0, no-cache">
+<meta http-equiv="pragma" content="no-cache">
+<meta http-equiv="expires" content="0">
+</head>
+<style>
+     h6{
+    display: block;
+    font-size: 0.67em;
+    margin-block-start: -4.2em;
+    margin-block-end: 1.33em;
+    margin-inline-start: 47px;
+    margin-inline-end: 0px;
+    font-weight: bold;
+    color: green;
+    }
+    
+</style>
+<body>
+  <%- include('./alert_msg.ejs') %>
+
+    <div class="container">
+        <input type="checkbox" id="flip">
+        <div class="cover">
+            <div class="front">
+                <img src="images/login.jpg" alt="">
+                <div class="text">
+                    <!-- <span class="text-1">Let's get connected</span> -->
+                </div>
+            </div>
+        </div>
+        <div class="forms">
+            <div class="form-content">
+                <div class="login-form">
+                    <div class="logo"><img src="images/swaayatt_logo.png" style="width: 40px; height: 40px;margin-top: -10px;"></div><h6>Swaayatt <br>Robot</h6>
+
+                    <div class="title">Login</div>
+                    <form action="/login" method="post" >
+                        <div class="input-boxes">
+                            <div class="input-box">
+                                <i class="fas fa-envelope"></i>
+                                <input type="text" placeholder="Enter your email" required name="admin_email" >
+                            </div>
+                            <div class="input-box">
+                                <i class="fas fa-lock"></i>
+                                <input type="password" placeholder="Enter your password" required name="admin_password" >
+                            </div>
+                            <div class="text"><a href="/forgot_password">Forgot password?</a></div>
+                            <div class="button input-box">
+                                <input type="submit" value="Sumbit">
+                        </div>
+                    </form>
+                </div>
+                
+            </div>
+        </div>
+    </div>
+
+    <script type = "text/javascript" >
+        function preventBack(){
+          window.history.forward();
+        }
+        setTimeout(preventBack(), 0);
+        window.onunload= function (){null}
+      // disableBackButton()
+      </script>
+</body>
+
+</html>

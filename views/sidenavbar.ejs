@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/stylesheets/style.css">
+    <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.0/css/boxicons.min.css">
+    <title>Navbar</title>
+</head>
+<body>
+     <!-- SIDEBAR -->
+  <section id="sidebar">
+    <a href="#" class="brand">
+      <img src="/images/swaayatt_logo.png" style="width: 60px; height: 60px;">
+      <span class="text logo_image" style="font-family: 'Montserrat', sans-serif;color: green; font-weight: 700;">
+        Inventory Dashboard</span>
+    </a>
+    <ul class="side-menu top">
+      <li class="active">
+        <a href="/">
+          <i class='bx bxs-dashboard'></i>
+          <span class="text">Dashboard</span>
+        </a>
+      </li>
+      <li>
+        <a href="/item" >
+          <i class='bx bxs-cart-alt'></i>
+          <span class="text">Inventory</span>
+        </a>
+      </li>
+      <li>
+        <a href="/fuel">
+          <i class='bx bxs-gas-pump'></i>
+          <span class="text">Fuel</span>
+        </a>
+      </li>
+      <li>
+        <a href="/reimbursement">
+          <i class='bx bxs-dollar-circle'></i>
+          <span class="text">Reimbursement</span>
+        </a>
+      </li>
+      <li>
+        <a href="/get-sheets">
+          <i class='bx bxs-message-dots'></i>
+          <span class="text">Get Sheets</span>
+        </a>
+      </li>
+      <li>
+        <a href="#">
+          <i class='bx bxs-cog'></i>
+          <span class="text">Settings</span>
+        </a>
+      </li>
+
+    </ul>
+    <ul class="side-menu">
+
+      <li>
+        <a href="/logout" class="logout" style="margin-top: 375px;">
+          <i class='bx bx-log-out'></i>
+
+          <span class="text">Logout</span>
+        </a>
+      </li>
+    </ul>
+  </section>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const navItems = document.querySelectorAll("#sidebar .side-menu a");
+
+        function setActiveItem() {
+            navItems.forEach(navItem => {
+                navItem.closest('li').classList.remove("active");
+                // Mark the navigation item as active if its href matches the current URL path
+                if (window.location.pathname === navItem.getAttribute("href")) {
+                    navItem.closest('li').classList.add("active");
+                }
+            });
+        }
+
+        // Set initial active item on page load
+        setActiveItem();
+
+        // Add click event listener to each navbar item
+        navItems.forEach(item => {
+            item.addEventListener("click", function () {
+                setActiveItem();
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <link href='https://unpkg.com/boxicons@2.0.9/css/boxicons.min.css' rel='stylesheet'>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.0/css/boxicons.min.css">
+  <link rel="stylesheet" href="/stylesheets/style.css">
+  <title>Dashboard</title>
+  </head>
+<style>
+  .action-icon-btn{
+    padding: 10px 20px;
+    margin-right: 10px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+
+ .action-icon-btn:hover {
+    background-color: #0056b3;
+  }
+
+  .container {
+    position: relative;
+    width: 100%;
+  }
+
+  .right-aligned {
+    position: absolute;
+    top: -22px;
+    right: 0;
+  }
+
+  .right-aligned button {
+    border-radius: 5px;
+  }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 999;
+  }
+
+  .close-icon {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+    font-size: 20px;
+    color: #ccc;
+  }
+
+  .close-icon:hover {
+    color: #555;
+  }
+
+  .form-container {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 60%;
+    transform: translate(-50%, -50%);
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    z-index: 1000;
+  }
+
+  .form-container.active {
+    display: block;
+  }
+
+
+   /* employee Form */
+  #employeeForm {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  #employeeForm h2 {
+    font-family: Montserrat;
+    font-weight: 700;
+    color: #0056b3;
+    margin-bottom: 20px;
+  }
+
+  #employeeForm label {
+    font-weight: 600;
+  }
+
+  #employeeForm input[type="text"],
+  #employeeForm input[type="email"],
+  #employeeForm input[type="tel"] {
+    width: calc(100% - 40px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  #employeeForm input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  #employeeForm input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+
+  /* Vendor Form */
+  #vendorForm {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  #vendorForm h2 {
+    font-family: Montserrat;
+    font-weight: 700;
+    color: #0056b3;
+    margin-bottom: 20px;
+  }
+
+  #vendorForm label {
+    font-weight: 600;
+  }
+
+  #vendorForm input[type="text"],
+  #vendorForm input[type="email"],
+  #vendorForm input[type="tel"] {
+    width: calc(100% - 40px);
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+  }
+
+  #vendorForm input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-size: 16px;
+  }
+
+  #vendorForm input[type="submit"]:hover {
+    background-color: #0056b3;
+  }
+  
+</style>
+
+<body>
+   <!-- SIDEBAR -->
+  <%- include('./sidenavbar.ejs') %>
+  <%- include('./alert_msg.ejs') %>
+
+  <% function formatDateToDDMMYYYY(date) {
+    const formattedDate = new Date(date);
+    const day = String(formattedDate.getDate()).padStart(2, '0');
+    const month = String(formattedDate.getMonth() + 1).padStart(2, '0'); // Months are zero-based
+    const year = formattedDate.getFullYear();
+    return `${day}-${month}-${year}`;
+} %>
+   
+
+
+    <!-- CONTENT -->
+    <section id="content">
+      <nav>
+        <i class='bx bx-transfer-alt'></i>
+        <div class="container">
+          <div class="right-aligned">
+            <button  class="action-icon-btn" onclick="toggleForm('employeeForm')">Add Employee</button>
+            <button class="action-icon-btn" onclick="toggleForm('vendorForm')">Add Vendor</button>
+          </div>
+        </div>
+      </nav>
+
+
+      <div class="overlay" onclick="closeForms()"></div>
+
+      <div id="employeeForm" class="form-container">
+        <h2 style="font-family: Montserrat; font-weight: 700; color: #0056b3;">Add Employee</h2>
+        <span class="close-icon" onclick="closeForm('employeeForm')"><i class='bx bx-x'></i></span>
+        
+        
+        
+        <form action="/add-employee" method="post">
+          <label for="empName">Name:</label><br>
+          <input type="text" id="empName" name="Name" style="width: 100%;" required ><br>
+          <label for="empEmail">Email:</label><br>
+          <input type="email" id="empEmail" name="Email" style="width: 100%;" required ><br>
+          <label for="empPhone">Phone Number:</label><br>
+          <input type="tel" id="empPhone" name="Number" style="width: 100%;" required ><br><br>
+          <button type="submit" id="emp_submit">Add</button>
+        </form>
+
+
+      </div>
+
+      <div id="vendorForm" class="form-container">
+        <h2 style="font-family: Montserrat; font-weight: 700; color: #0056b3;">Add Vendor</h2>
+        <span class="close-icon" onclick="closeForm('vendorForm')"><i class='bx bx-x'></i></span>
+        <form action="/add-vendor" method="post">
+          <label for="vendorName">Business Name:</label><br>
+          <input type="text" id="vendorName" name="Business_name" style="width: 100%;" required ><br>
+          <label for="vendorEmail">Business Email:</label><br>
+          <input type="email" id="vendorEmail" name="Business_email" style="width: 100%;" required ><br>
+          <label for="vendorPhone">Business Contact Number:</label><br>
+          <input type="tel" id="vendorPhone" name="Business_contact_number" style="width: 100%;" required ><br><br>
+          <button type="submit" id="emp_submit">Add</button>
+        </form>
+      </div>
+
+      <!-- MAIN -->
+      <main id="mainDashboard">
+        <div class="head-title">
+          <div class="left">
+            <h1>Dashboard</h1>
+            <ul class="breadcrumb">
+              <li>
+                <a href="#">Dashboard</a>
+              </li>
+              <li><i class='bx bx-chevron-right'></i></li>
+              <li>
+                <a class="active" href="#">Home</a>
+              </li>
+            </ul>
+          </div>
+
+        </div>
+
+        <ul class="box-info">
+          <li>
+           <%
+            const currentDate = new Date();
+
+
+const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+const currentMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+
+
+const objectsInCurrentMonth = Lot_data.filter(obj => obj.Purchase_date >= currentMonthStart && obj.Purchase_date <= currentMonthEnd);
+
+
+const totalPayableSum = objectsInCurrentMonth.reduce((accumulator, currentValue) => {
+    return accumulator + currentValue.Total_payable;
+}, 0);
+
+const objectsInCurrentMonth_fuel = fuel_data.filter(obj => obj.Date >= currentMonthStart && obj.Date <= currentMonthEnd);
+
+
+const totalPayableSum_fuel = objectsInCurrentMonth_fuel.reduce((accumulator, currentValue) => {
+    return accumulator + currentValue.Total;
+}, 0);
+
+const objectsInCurrentMonth_reimbursement = reimbursement_data.filter(obj => obj.Date >= currentMonthStart && obj.Date <= currentMonthEnd);
+
+
+const totalPayableSum_reimbursement = objectsInCurrentMonth_reimbursement.reduce((accumulator, currentValue) => {
+    return accumulator + currentValue.Amount;
+}, 0);
+
+          
+     %>       
+
+            <i class='bx bxs-cart-alt'></i>
+            <span class="text">
+              <h3>₹ <%=totalPayableSum%></h3>
+              <p>Total Spent on Items (paid+unpaid)</p>
+            </span>
+          </li>
+          <li>
+            <!-- <i class="bx bx-cart"></i> -->
+            <i class="bx bx-package"></i>
+            <span class="text">
+              <h3>₹ <%=totalPayableSum_fuel%></h3>
+              <p>Spent On Fuel This Month</p>
+            </span>
+          </li>
+          <li>
+            <i class='bx bxs-shopping-bag'></i>
+            <span class="text">
+              <h3>₹ <%=totalPayableSum_reimbursement%></h3>
+              <p>Total Amount Reimbursed This Month</p>
+            </span>
+          </li>
+          <li>
+            <i class='bx bx-rupee'></i>
+
+            <span class="text">
+              <h3>₹ <%= totalPayableSum_reimbursement+totalPayableSum_fuel+totalPayableSum %></h3>
+              <p>Total Money Spent This Month</p>
+            </span>
+          </li>
+        </ul>
+
+<style>
+  .graphs, .g{
+    /* border: 2px solid red ; */
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 35px;
+  }
+  .inventorygraph,.fuelgraph,.reimbursementgraph,.totalgraph{
+    /* border: 2px solid red ; */
+    width: 45%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    /* text-align: left; */
+  }
+
+</style>
+<div class="graphs">
+  <div class="inventorygraph">
+    <h5>Inventory Amount Data</h5>
+    <p style="color: var(--dark); font-weight: 300;">(This Month)</p>
+    <canvas id="dayWiseChart"></canvas>
+  </div>
+
+  <div class="fuelgraph">
+  <h5>Fuel Amount Data</h5>
+  <p style="color: var(--dark);font-weight: 300;">(This Month)</p>
+
+    <canvas id="employeeWiseChart"></canvas>
+
+  </div>
+</div>
+
+
+
+<div class="graphs g">
+  <div class="reimbursementgraph">
+    <h5>Reimbursed Amount Data</h5>
+    <p style="color: var(--dark); font-weight: 300;">(This Month)</p>
+    <canvas id="dayWiseChart_reimbursement"></canvas>
+  </div>
+
+  <div class="totalgraph">
+  <h5>Total Amount Data</h5>
+  <p style="color: var(--dark); font-weight: 300;">(Last 30 Days)</p>
+
+    <!-- <canvas id="Total_data_graph"></canvas> -->
+    <canvas id="myChart" ></canvas>
+  </div>
+</div>
+
+
+        <div class="table-data">
+          <div class="order" style="margin-top: 60px;">
+            <div class="head">
+              <h5 style="color: var(--dark);">Reimbursement Requests</h5>
+              <!-- <i class='bx bx-chevron-down'></i> -->
+            </div>
+            <table style="border: 1px solid #dee2e6;">
+              <thead>
+                <tr style="border: 1px solid #dee2e6;">
+                  <th>Employee</th>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Reason</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!reim_requests || reim_requests.length === 0) { %>
+                  <tr>
+                    <td></td>
+                    <td>No Reimbursement Requests Found</td>
+                  </tr>
+                <% } else { %>
+                  <% for (let i = 0; i < reim_requests.length; i++) { %>
+                    <tr>
+                      <td><%= reim_requests[i].Employee.Name %></td>
+                      <td><%= formatDateToDDMMYYYY(reim_requests[i].Date) %></td>
+                      <td><%= reim_requests[i].requested_amount %></td>
+                      <td><%= reim_requests[i].reason %></td>
+                      <td style="display: ruby-text;">
+                        <form action="/accept-r-req" method="post">
+                          <input type="hidden" name="req_id" value="<%= reim_requests[i]._id %>" >
+                          <select name="Paid_by" id="">
+                            <option value="Sanjeev Sharma">Sanjeev Sharma</option>
+                            <option value="Company">Company</option>
+                          </select>
+                          <button type="submit" class="accept-btn" style="border: none;">
+                            <span class="action-icon accept-icon">
+                              <i class='bx bx-check'></i>
+                            </span>
+                          </button>
+                        </form>
+                        <form action="/reject-r-req" method="post">
+                          <input type="hidden" name="req_id" value="<%= reim_requests[i]._id %>" >
+                          <button type="submit" class="reject-btn" style="margin-top: 5px; border: none;">
+                            <span class="action-icon reject-icon">
+                              <i class='bx bx-x'></i>
+                            </span>
+                          </button>
+                        </form>
+                      </td>
+                    </tr>
+                  <% } %>
+                <% } %>
+              </tbody>
+              
+            </table>
+          </div>
+          
+        
+          <div class="order" style="margin-top: 25px;">
+            <div class="head">
+              <h5 style="color: var(--dark);">Item Requests</h5>
+              <!-- <i class='bx bx-chevron-down'></i> -->
+            </div>
+            <table style="border: 1px solid #dee2e6;">
+              <thead>
+                <tr style="border: 1px solid #dee2e6;">
+                  <th>Employee</th>
+                  <th>Date</th>
+                  <th>Item</th>
+                  <th>Quantity</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <% if (!item_requests || item_requests.length === 0) { %>
+                  <tr>
+                    <td></td>
+                    <td>No Item Requests Found</td>
+                  </tr>
+                <% } else { %>
+                <% for (let i = 0; i < item_requests.length; i++) { %>
+                  <tr>
+                    <td><%= item_requests[i].Employee.Name %></td>
+                    <td><%= formatDateToDDMMYYYY(item_requests[i].Date) %></td>
+                    <td><%= item_requests[i].item.Type_name %></td>
+                    <td><%= item_requests[i].Quantity %></td>
+                    <td>
+                      <form action="/accept-i-req" method="post">
+                        <input type="hidden" name="req_id" value="<%= item_requests[i]._id %>" >
+                        <button type="submit" class="accept-btn" style=" border: none;"> <span class="action-icon accept-icon">
+                          <i class='bx bx-check'></i>
+                        </span></button>
+                      </form>
+                      <form action="/reject-i-req" method="post">
+                        <input type="hidden" name="req_id" value="<%= item_requests[i]._id %>" >
+                        <button type="submit" class="reject-btn" style="margin-top: 5px;  border: none;" ><span class="action-icon reject-icon">
+                          <i class='bx bx-x'></i>
+                        </span></button>
+                      </form>
+                    </td>
+                  </tr>
+                <% } %>
+                <% } %>
+              </tbody>
+            </table>
+          </div>
+
+<!-- pending amount to pay  -->
+       
+<div class="order" style="margin-top: 25px;">
+  <div class="head">
+    <h5 style="color: var(--dark);">Pending Payments</h5>
+    <!-- <i class='bx bx-chevron-down'></i> -->
+  </div>
+  <table style="border: 1px solid #dee2e6;">
+    <thead>
+      <tr style="border: 1px solid #dee2e6;">
+        <th>Vendor</th>
+        <th>Date</th>
+        <th>Quantity</th>
+        <th>Pending Amount</th>
+        <th>Mark as Clear</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!Lot_data || Lot_data.length === 0) { %>
+        <tr>
+          <td></td>
+          <td>No Pending Payment</td>
+        </tr>
+      <% } else { %>
+
+
+
+      <% for (let i = 0; i < Lot_data.length; i++) { %>
+       
+       
+       <% if(Lot_data[i].Total_payable != Lot_data[i].Total_paid){%>
+        
+        <% var v_name =  vendors.find(vendor => vendor._id.toString() == Lot_data[i].Vendor).Business_name %>
+
+        <tr>
+          <td><%= v_name %></td>
+          <td><%= formatDateToDDMMYYYY(Lot_data[i].Purchase_date) %></td>
+          <td><%= Lot_data[i].Items.length %></td>
+
+          <td><%= Lot_data[i].Total_payable - Lot_data[i].Total_paid %></td>
+        
+        <td>  <form action="/mark-as-clear" method="post">
+            <input type="hidden" name="lot_id" value="<%=Lot_data[i]._id%>" >
+            <button type="submit" class="reject-btn" style="margin-top: 5px; border: none;"><span class="action-icon accept-icon">
+              <i class='bx bx-check'></i>
+
+            </span></button>
+          </form>
+        </td>
+        </tr>
+      <%}%>
+      <% } %>
+      <% } %>
+    </tbody>
+  </table>
+</div>
+
+
+
+</div>
+        
+
+        
+
+      </main>
+
+
+      <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+      <script>
+        // Merge the three arrays into a single array of objects
+        var Lot_data =JSON.parse('<%- JSON.stringify(Lot_data) %>');
+        var fuel_data =JSON.parse('<%- JSON.stringify(fuel_data) %>');
+       var reimbursement_data =JSON.parse('<%- JSON.stringify(reimbursement_data) %>');
+       
+       const mergedData = [];
+
+Lot_data.forEach(item => { 
+    mergedData.push({ Date: new Date(item.Purchase_date), Amount: item.Total_payable, Type: 'Lot' });
+}); 
+
+fuel_data.forEach(item => { 
+    mergedData.push({ Date: new Date(item.Date), Amount: item.Total, Type: 'Fuel' });
+}); 
+
+reimbursement_data.forEach(item => { 
+    mergedData.push({ Date: new Date(item.Date), Amount: item.Amount, Type: 'Reimbursement' });
+});
+
+        // Sort the merged array based on the Date
+        mergedData.sort((a, b) => a.Date - b.Date);
+
+        // Process data and create chart
+        const ctx = document.getElementById('myChart').getContext('2d');
+        const myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: mergedData.map(item => item.Date.toLocaleDateString('en-US', { month: 'short', day: '2-digit' })),
+                datasets: [
+                    {
+                        label: 'Lot',
+                        data: mergedData.filter(item => item.Type === 'Lot').map(item => item.Amount),
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Fuel',
+                        data: mergedData.filter(item => item.Type === 'Fuel').map(item => item.Amount),
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Reimbursement',
+                        data: mergedData.filter(item => item.Type === 'Reimbursement').map(item => item.Amount),
+                        backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                        borderColor: 'rgba(255, 206, 86, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: true
+                        }
+                    }]
+                }
+            }
+        });
+
+    </script>
+
+
+
+      <!-- Bootstrap JS -->
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+     
+    </section>
+    <!-- CONTENT -->
+
+
+    <script src="/javascripts/script.js"></script>
+
+
+<script>
+  // for charts 
+
+// for amaount chart 
+// removing previous canvas
+var currentDate = new Date()
+const currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).setHours(0,0,0,0);
+const currentMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).setHours(0,0,0,0);
+
+
+var lots = JSON.parse('<%- JSON.stringify(Lot_data) %>');
+
+// Filter lots based on date range
+var filteredLots = lots.filter(function (lot) {
+    var purchaseDate = new Date(lot.Purchase_date).setHours(0,0,0,0);
+
+
+
+    return purchaseDate >= currentMonthStart && purchaseDate <= currentMonthEnd;
+});
+
+var dayWiseData = filteredLots
+
+var canvasToRemove = document.getElementById('dayWiseChart')
+// var canvasToRemove2 = document.getElementById('')employeeWiseChart
+
+canvasToRemove.parentNode.removeChild(canvasToRemove);
+// canvasToRemove2.parentNode.removeChild(canvasToRemove2);
+
+
+var canvas1 = document.createElement('canvas');
+// const canvas2 = document.createElement('canvas');
+
+canvas1.id = 'dayWiseChart';
+// canvas2.id = 'employeeWiseChart';
+
+var parentDiv = document.querySelector('.inventorygraph');
+// const parentDiv2 = document.getElementById('employee-chart-container');
+
+parentDiv.appendChild(canvas1);
+// parentDiv2.appendChild(canvas2);
+
+
+
+// canvas rendr-remove end
+
+var dataWithAmounts = dayWiseData.map(data => ({ date: moment(data.Purchase_date), amount: data.Total_payable }));
+
+// Sort the array based on dates
+dataWithAmounts.sort((a, b) => a.date - b.date);
+
+// Extract sorted dates and amounts arrays
+var dates = dataWithAmounts.map(item => item.date.format('MMM DD'));
+var amounts = dataWithAmounts.map(item => item.amount);
+
+
+  var amountWiseCtx = document.getElementById('dayWiseChart').getContext('2d');
+  var cv = document.getElementById('dayWiseChart')
+  var dayWiseChart = null;
+  // let amountWiseEmployeesChart = null; // Declare the chart variable outside the chart creation scope
+
+// Check if chart exists and destroy it before creating a new one
+amountWiseCtx.clearRect(0, 0, cv.width, cv.height);
+  dayWiseChart = new Chart(amountWiseCtx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Amount',
+        data: amounts,
+        backgroundColor: 'rgba(37, 37, 87, 1)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Amount'
+          },
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+
+
+
+  // for fuel data 
+  
+
+</script>
+
+
+<script>
+  var currentDate = new Date()
+//  currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).setHours(0,0,0,0);
+//  currentMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).setHours(0,0,0,0);
+
+
+var lots = JSON.parse('<%- JSON.stringify(fuel_data) %>');
+
+// Filter lots based on date range
+var filteredLots = lots.filter(function (lot) {
+    var purchaseDate = new Date(lot.Date).setHours(0,0,0,0);
+
+
+
+    return purchaseDate >= currentMonthStart && purchaseDate <= currentMonthEnd;
+});
+
+var dayWiseData = filteredLots
+
+var canvasToRemove = document.getElementById('employeeWiseChart')
+// var canvasToRemove2 = document.getElementById('employeeWiseChart')
+
+canvasToRemove.parentNode.removeChild(canvasToRemove);
+// canvasToRemove2.parentNode.removeChild(canvasToRemove2);
+
+
+var canvas1 = document.createElement('canvas');
+// const canvas2 = document.createElement('canvas');
+
+canvas1.id = 'employeeWiseChart';
+// canvas2.id = 'employeeWiseChart';
+
+var parentDiv = document.querySelector('.fuelgraph');
+// const parentDiv2 = document.getElementById('employee-chart-container');
+
+parentDiv.appendChild(canvas1);
+// parentDiv2.appendChild(canvas2);
+
+
+
+// canvas rendr-remove end
+
+var dataWithAmounts = dayWiseData.map(data => ({ date: moment(data.Date), amount: data.Total }));
+
+// Sort the array based on dates
+dataWithAmounts.sort((a, b) => a.date - b.date);
+
+// Extract sorted dates and amounts arrays
+var dates = dataWithAmounts.map(item => item.date.format('MMM DD'));
+var amounts = dataWithAmounts.map(item => item.amount);
+
+
+  var amountWiseCtx = document.getElementById('employeeWiseChart').getContext('2d');
+  var cv = document.getElementById('employeeWiseChart')
+  var dayWiseChart = null;
+  // let amountWiseEmployeesChart = null; // Declare the chart variable outside the chart creation scope
+
+// Check if chart exists and destroy it before creating a new one
+amountWiseCtx.clearRect(0, 0, cv.width, cv.height);
+  dayWiseChart = new Chart(amountWiseCtx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Amount',
+        data: amounts,
+        backgroundColor: 'rgba(37, 37, 87, 1)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Amount'
+          },
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+</script>
+<script>
+  var currentDate = new Date()
+//  currentMonthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1).setHours(0,0,0,0);
+//  currentMonthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).setHours(0,0,0,0);
+
+
+var lots = JSON.parse('<%- JSON.stringify(reimbursement_data) %>');
+
+// Filter lots based on date range
+var filteredLots = lots.filter(function (lot) {
+    var purchaseDate = new Date(lot.Date).setHours(0,0,0,0);
+
+
+
+    return purchaseDate >= currentMonthStart && purchaseDate <= currentMonthEnd;
+});
+
+var dayWiseData = filteredLots
+
+var canvasToRemove = document.getElementById('dayWiseChart_reimbursement')
+// var canvasToRemove2 = document.getElementById('employeeWiseChart')
+
+canvasToRemove.parentNode.removeChild(canvasToRemove);
+// canvasToRemove2.parentNode.removeChild(canvasToRemove2);
+
+
+var canvas1 = document.createElement('canvas');
+// const canvas2 = document.createElement('canvas');
+
+canvas1.id = 'dayWiseChart_reimbursement';
+// canvas2.id = 'employeeWiseChart';
+
+var parentDiv = document.querySelector('.reimbursementgraph');
+// const parentDiv2 = document.getElementById('employee-chart-container');
+
+parentDiv.appendChild(canvas1);
+// parentDiv2.appendChild(canvas2);
+
+
+
+// canvas rendr-remove end
+
+var dataWithAmounts = dayWiseData.map(data => ({ date: moment(data.Date), amount: data.Amount }));
+
+// Sort the array based on dates
+dataWithAmounts.sort((a, b) => a.date - b.date);
+
+// Extract sorted dates and amounts arrays
+var dates = dataWithAmounts.map(item => item.date.format('MMM DD'));
+var amounts = dataWithAmounts.map(item => item.amount);
+
+
+  var amountWiseCtx = document.getElementById('dayWiseChart_reimbursement').getContext('2d');
+  var cv = document.getElementById('dayWiseChart_reimbursement')
+  var dayWiseChart = null;
+  // let amountWiseEmployeesChart = null; // Declare the chart variable outside the chart creation scope
+
+// Check if chart exists and destroy it before creating a new one
+amountWiseCtx.clearRect(0, 0, cv.width, cv.height);
+  dayWiseChart = new Chart(amountWiseCtx, {
+    type: 'line',
+    data: {
+      labels: dates,
+      datasets: [{
+        label: 'Amount',
+        data: amounts,
+        backgroundColor: 'rgba(37, 37, 87, 1)',
+        borderColor: 'rgba(54, 162, 235, 1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        xAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Date'
+          }
+        }],
+        yAxes: [{
+          scaleLabel: {
+            display: true,
+            labelString: 'Amount'
+          },
+          ticks: {
+            beginAtZero: true
+          }
+        }]
+      }
+    }
+  });
+
+</script>
+</body>
+
+</html>

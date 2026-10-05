@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Profile</title>
+    <link rel="stylesheet" href="/stylesheets/profile.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+    <h1>My Profile</h1>
+
+    <!-- Personal Information Section -->
+    <div class="section" id="personal">
+        <div class="section-heading">
+            Personal Information
+            <!-- <span class="edit-icon" onclick="handleEdit('personal')">✎</span> -->
+        </div>
+        <div class="field">
+            <label for="first-name">First Name:</label>
+            <span id="first-name">Aakriti</span>
+        </div>
+        <div class="field">
+            <label for="last-name">Last Name:</label>
+            <span id="last-name">Jha</span>
+        </div>
+    </div>
+
+    <!-- Email Address Section -->
+    <div class="section" id="email">
+        <div class="section-heading">
+            Email Address
+            <span class="edit-icon" onclick="handleEdit('email')">✎</span>
+        </div>
+        <div class="field">
+            <label for="email">Email Address:</label>
+            <span id="email">aakriti@.com</span>
+        </div>
+        <div class="field" id="password-field">
+            <label for="password">Password:</label>
+            <span class="eye-icon" onclick="togglePasswordVisibility()">&#128065;</span>
+            <input type="password" id="password" value="aakriti@123" disabled>
+        </div>
+    </div>
+</div>
+
+    <script>
+        function togglePasswordVisibility() {
+            var passwordInput = document.getElementById("password");
+            var eyeIcon = document.querySelector(".eye-icon");
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                eyeIcon.textContent = "👁️";
+            } else {
+                passwordInput.type = "password";
+                eyeIcon.textContent = "👁️‍🗨️";
+            }
+        }
+    
+        function handleEdit(section) {
+            // Change edit icon to save icon
+            const icon = document.querySelector(`#${section} .edit-icon`);
+            icon.textContent = '✔️';
+            icon.setAttribute('onclick', `handleSave('${section}')`);
+            // Enable password input only if it was disabled
+            const passwordInput = document.getElementById('password');
+            if (passwordInput.disabled) {
+                passwordInput.disabled = false;
+            }
+        }
+    
+        function handleSave(section) {
+            // Change save icon back to edit icon
+            const icon = document.querySelector(`#${section} .edit-icon`);
+            icon.textContent = '✎';
+            icon.setAttribute('onclick', `handleEdit('${section}')`);
+            // Disable password input
+            document.getElementById('password').disabled = true;
+        }
+    </script>
+    
+</body>
+</html>
