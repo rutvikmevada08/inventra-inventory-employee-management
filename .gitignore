@@ -1,0 +1,19 @@
+# dependencies and build output
+node_modules/
+frontend/dist/
+
+# secrets and local config - never commit
+.env
+.env.*
+!.env.example
+
+# invoice files are business documents, not source code
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# logs and OS files
+*.log
+npm-debug.log*
+.DS_Store
+Thumbs.db
+coverage/
