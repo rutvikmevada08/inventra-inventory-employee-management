@@ -1,156 +1,325 @@
 # Smart Inventory & Workforce Management System
 
-A web application for a small or medium-sized organisation to manage purchases and stock, vendors, staff
-requests and reimbursements, and vehicle fuel. Labour attendance, daily wages, advances and payroll are the
-next modules (see Status).
+A full-stack web application designed to simplify day-to-day **inventory and business operations** in one place.
 
-This project evolved from an existing Express + EJS inventory application. The working business logic was kept
-(purchase lots with line items, payment settlement, item-request and reimbursement approval, fuel logging, the
-investor and inventory Excel sheets) and moved behind a REST API with a React front end.
+The system helps manage inventory, purchases, vendors, stock movements, requests, expenses, fuel records, reimbursements, and users through a centralized dashboard.
 
-## Status
+The project is also designed to grow into a complete **workforce management system**, where employee records, attendance, advances, wages, and payroll can be managed alongside inventory operations.
 
-| Phase | Scope | State |
-|---|---|---|
-| 1-2 | Analysis of the old app, target design | Done |
-| 3 | REST API, auth, inventory ledger, vendors, requests, reimbursements, fuel, exports, legacy migration | Done |
-| 4 | React + Vite shell: login, layout, routing, dashboard, vendors | Done |
-| 5 | Inventory screens: purchases, stock, ledger, item requests, reimbursements, fuel, vehicles, item types, users, Excel exports | Done |
-| 6-9 | Employees, attendance, payroll, advances, payment history | Planned |
-| 10-12 | Reports, dashboard charts, UI pass, final cleanup | Planned |
+---
 
-## Technology
+## About the Project
 
-React, Vite, React Router, Axios, plain CSS. Node.js, Express, Mongoose, MongoDB. JWT (Bearer header) with bcrypt
-password hashing and `admin` / `staff` roles. ExcelJS for exports, Multer for uploads, Nodemailer for optional
-e-mail notifications. No Bootstrap, no Tailwind, no EJS.
+Managing inventory and operational records through spreadsheets or separate systems can become difficult as the amount of data grows.
 
-## Project layout
+This project provides a centralized platform where important business information can be recorded, managed, and tracked from a single application.
 
+Instead of maintaining separate records for purchases, stock, vendors, expenses, fuel, and requests, everything is connected through one system.
+
+The application focuses on keeping the interface simple and practical so that it can be used for real-world day-to-day operations.
+
+---
+
+## Features
+
+### Inventory Management
+
+- Manage inventory items and item types
+- Track available stock
+- Record stock movements
+- Maintain stock ledger
+- Perform stock adjustments
+- Track inventory-related transactions
+- Monitor inventory information
+
+### Purchase Management
+
+- Create and manage purchase records
+- Manage purchase lots
+- Associate purchases with vendors
+- Upload purchase invoices
+- Track purchase payments
+- Settle purchase transactions
+
+### Vendor Management
+
+- Add and manage vendors
+- Store vendor information
+- Track vendor-related purchases
+- View vendor records
+
+### Requests Management
+
+- Create item requests
+- Track request status
+- Manage pending requests
+- Maintain request history
+
+### Expense & Reimbursement Management
+
+- Record reimbursements
+- Manage expense information
+- Track reimbursement status
+- Maintain expense records
+
+### Fuel Management
+
+- Record fuel transactions
+- Associate fuel records with vehicles
+- Track fuel expenses
+- Maintain fuel history
+
+### User Management
+
+- User authentication
+- Admin and staff roles
+- Protected routes
+- User management
+- Role-based access control
+
+### Data Export
+
+Important records can be exported to **Excel** for reporting, analysis, or external record keeping.
+
+---
+
+## Dashboard
+
+The application provides a centralized dashboard for quickly accessing important parts of the system.
+
+Instead of navigating through multiple separate tools, users can access inventory, vendors, purchases, requests, expenses, fuel, and administration from one application.
+
+The dashboard can also be extended with additional business and workforce analytics as the system grows.
+
+---
+
+## Workforce Management
+
+The project is designed to support workforce operations alongside inventory management.
+
+The planned workforce functionality includes:
+
+- Employee management
+- Employee profiles
+- Attendance tracking
+- Employee advances
+- Wage management
+- Payroll
+- Payment history
+- Employee-related reports
+
+This allows the system to eventually connect operational and workforce information in a single platform.
+
+For example:
+
+```text
+Employee
+   ↓
+Attendance
+   ↓
+Wages
+   ↓
+Advances
+   ↓
+Payroll
+   ↓
+Payment
 ```
-backend/    Express API   (config, middleware, models, controllers, routes, services, scripts, tests)
-frontend/   React app     (components, pages, layouts, services, hooks, context, utils, styles)
+
+---
+
+## Inventory Workflow
+
+The inventory side of the application follows a connected workflow:
+
+```text
+Vendor
+   ↓
+Purchase
+   ↓
+Stock
+   ↓
+Stock Movement
+   ↓
+Inventory
+   ↓
+Requests / Expenses
 ```
 
-## Running it locally
+This makes it easier to keep operational records connected rather than maintaining separate spreadsheets for every activity.
 
-Requirements: Node.js 18 or newer and a MongoDB server.
+---
+
+## Technology Stack
+
+### Frontend
+
+- React
+- Vite
+- JavaScript
+- React Router
+- CSS
+
+### Backend
+
+- Node.js
+- Express.js
+- REST API
+
+### Database
+
+- MongoDB
+
+### Other Technologies
+
+- Excel export
+- File uploads
+- Authentication
+- Role-based access control
+- API testing
+- Frontend testing
+
+---
+
+## Project Structure
+
+```text
+smart-inventory-workforce/
+│
+├── backend/
+│   ├── src/
+│   ├── models/
+│   ├── routes/
+│   ├── controllers/
+│   ├── middleware/
+│   └── ...
+│
+├── frontend/
+│   ├── src/
+│   ├── components/
+│   ├── pages/
+│   ├── services/
+│   └── ...
+│
+├── docs/
+│
+└── README.md
+```
+
+The structure may evolve as additional workforce and reporting functionality is added.
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+Make sure you have the following installed:
+
+- Node.js
+- npm
+- MongoDB
+
+### Clone the Repository
 
 ```bash
-# 1. Backend
-cd backend
-cp .env.example .env          # then set JWT_SECRET (see the file for a one-line generator)
-npm install
-npm run create-admin -- "Your Name" you@example.com   # prompts for a password
-npm run dev                   # http://localhost:5000
+git clone <your-repository-url>
+cd smart-inventory-workforce
+```
 
-# 2. Frontend (second terminal)
+### Backend Setup
+
+```bash
+cd backend
+npm install
+```
+
+Create a `.env` file and configure the required environment variables such as the database connection and authentication settings.
+
+Start the backend:
+
+```bash
+npm start
+```
+
+### Frontend Setup
+
+Open another terminal:
+
+```bash
 cd frontend
 npm install
-npm run dev                   # http://localhost:5173 (proxies /api to the backend)
 ```
 
-Environment variables are documented in `backend/.env.example`. Nothing secret is read by the front end.
-
-## Migrating data from the old application
-
-The migration has not been run against real data. The old database is only ever read, and the script is a dry run
-unless `--apply` is given. Start with a dry run, which writes nothing:
+Start the development server:
 
 ```bash
-cd backend
-LEGACY_MONGODB_URI=mongodb://127.0.0.1:27017/test \
-  npm run migrate:legacy -- --legacy-uploads=/path/to/old-project/public/uploads
+npm run dev
 ```
 
-Then apply it. Old `_id`s are kept, so it is safe to run again; records already migrated are skipped.
+Open the local URL shown by Vite in your browser.
 
-```bash
-LEGACY_MONGODB_URI=... npm run migrate:legacy -- --legacy-uploads=... --apply --admin-emails=you@company.com
-```
+---
 
-The old app used the default `test` database, so point `MONGODB_URI` at a different database name. The mapping from
-old collections to new ones is documented at the top of `backend/scripts/migrate-legacy.js`. Old plain-text passwords
-are replaced by bcrypt hashes; everyone becomes `staff` unless listed in `--admin-emails`. Invoice files are copied
-into `backend/uploads/` under their original names.
+## Testing
 
-## Tests
+The project includes testing for both the backend and frontend.
 
-```bash
-cd backend  && npm test    # API tests: needs a MongoDB; uses the database in TEST_MONGODB_URI
-cd frontend && npm test
-```
+Testing covers areas such as:
 
-The API tests drop their own database (default `smart_inventory_test`). Do not point `TEST_MONGODB_URI` at real data.
+- API functionality
+- Authentication
+- Inventory workflows
+- Frontend functionality
+- Application builds
 
-`backend/tests/e2e/smoke.mjs` drives the main workflows over real HTTP, including file uploads and Excel downloads,
-against a running API. It creates data, so use a throwaway database (instructions at the top of the file).
+Additional tests will be added as new workforce and reporting functionality is integrated.
 
-### Needs verification against a real MongoDB
+---
 
-Development and the automated tests ran against FerretDB 1.24 (a MongoDB-compatible server) because no `mongod` was
-available. Before deploying, run `cd backend && npm test` against your own MongoDB (`TEST_MONGODB_URI`). The first lines
-of `tests/mongo-specific.test.js` output say which server was used. These are the database-dependent behaviours to confirm:
+## Future Improvements
 
-| Behaviour | Where it matters | Checked by |
-|---|---|---|
-| Sparse unique indexes on `InventoryTransaction.lotItem`, `.itemRequest`, `.reversalOf` | A lot line can be received once, a request issued once, a receipt reversed once | `mongo-specific.test.js` (passed on FerretDB; confirm on MongoDB) |
-| Unique index on `User.email` | Duplicate accounts | `mongo-specific.test.js` |
-| Records without an `isActive` field count as active (`$ne: false`) | Older or imported data | `mongo-specific.test.js` |
-| `$group` with one `$sum` per stage | Stock balances, fuel and reimbursement totals, dashboard | `mongo-specific.test.js`, API tests |
-| Mongoose index creation at start-up (`autoIndex`) | The indexes above exist in production | Check `db.inventorytransactions.getIndexes()` once |
-| No multi-document transactions | Lot creation and stock receipts are undone by hand on failure (a standalone server has no transactions). On a replica set this could be tightened | Review, not testable here |
-| `insertMany` with `ordered: false` and raw inserts | `scripts/migrate-legacy.js` | Dry-run it against a copy of your real database first |
+Some of the areas planned for further development include:
 
-Aggregations deliberately avoid `$max` and several accumulators in one `$group`, which FerretDB 1.24 does not support;
-they work on MongoDB too, so nothing is lost.
+- Complete employee management
+- Attendance management
+- Employee advances
+- Wage and payroll management
+- Payment history
+- Advanced reports
+- Business analytics
+- Dashboard charts
+- More detailed role permissions
+- Additional data export options
+- Production deployment improvements
 
-## Design decisions worth knowing
+---
 
-- **Users and employees are different things.** `User` is someone who signs in. `Employee` (Phase 6) is a labour record
-  used for attendance and wages and may optionally link to a user.
-- **Stock is a ledger.** Stock on hand is calculated from append-only `InventoryTransaction` entries. Receiving a lot adds
-  stock-in entries, approving an item request adds a stock-out, and corrections are reversal or adjustment entries.
-  Ledger entries cannot be edited or deleted.
-- **Money is calculated by the backend.** Line totals, fuel totals, lot balances and payment limits are computed and
-  validated server-side. Amounts are stored in rupees rounded to two decimals.
-- **Nothing important is deleted.** Records are deactivated, not removed. Paid reimbursements and lots with payments
-  cannot be cancelled. Lot payments are appended, never overwritten.
-- **Authentication** is a JWT in the `Authorization` header. The old cookie that held the user's e-mail is gone.
-  Invoice files are only served to signed-in users.
+## Project Goal
 
-## API overview (current)
+The goal of this project is to build more than a basic inventory CRUD application.
 
-All routes are under `/api` and need a Bearer token except `POST /auth/login` and `GET /health`.
+It is designed as a connected business management platform where **inventory operations and workforce operations can work together**.
 
-| Area | Endpoints | Access |
-|---|---|---|
-| Auth | `POST /auth/login`, `GET /auth/me`, `POST /auth/change-password` | all |
-| Users | `GET/POST /users`, `PUT/DELETE /users/:id`, `POST /users/:id/reset-password` | admin |
-| Vendors, item types, vehicles | `GET/POST /…`, `GET/PUT/DELETE /…/:id`, `POST /…/:id/reactivate` | read: all, write: admin |
-| Lots | `GET/POST /lots`, `GET/PUT/DELETE /lots/:id`, `POST /lots/:id/receive`, `/payments`, `/mark-clear` | admin |
-| Inventory | `GET /inventory`, `GET /inventory/transactions`, `POST /inventory/adjustments` | admin |
-| Item requests | `GET/POST /item-requests`, `POST /item-requests/:id/approve`, `/reject` | staff create and see own, admin decides |
-| Reimbursements | `GET/POST /reimbursements`, `…/:id/approve`, `/reject`, `/pay`, `GET /reimbursements/summary` | staff create and see own, admin decides |
-| Fuel | `GET/POST /fuel`, `PUT/DELETE /fuel/:id` | staff create and see own, admin all |
-| Vendor summary | `GET /vendors/:id/summary` | admin |
-| Exports | `GET /exports/investor-sheet`, `GET /exports/inventory-sheet` (`?from=&to=`) | admin |
-| Dashboard | `GET /dashboard/summary` | all (content depends on role) |
+The long-term system will bring areas such as:
 
-Responses use `{ success, data, meta }`; errors use `{ success: false, message, errors? }`.
+**Inventory + Purchases + Vendors + Expenses + Employees + Attendance + Payroll + Payments + Reports**
 
-## Screens (current)
+into one application.
 
-Dashboard, Stock (with adjustments), Stock ledger, Purchases (list, new purchase with line items and invoice upload,
-detail with payments, receive and cancel), Item requests, Item types, Reimbursements (request, approve, reject, pay),
-Fuel, Vehicles, Vendors (with purchase summary), Excel exports, Users (add, edit, reset password, deactivate).
-Staff see Item requests, Reimbursements, Fuel and Vendors; everything else is administrator only.
+---
 
-## Screenshots
+## Author
 
-To be added once the remaining screens are built.
+**Rutvik Mevada**
 
-## Security note
+B.Tech Computer Science & Engineering  
+Parul University
 
-The original project contained a MongoDB Atlas connection string, mail passwords and a session secret in source
-files. None of that was carried over, but those credentials were exposed in the original archive and should be rotated.
+---
+
+## Project Status
+
+The core inventory management functionality is currently implemented and functional.
+
+The system is being expanded toward a complete inventory and workforce management platform.
