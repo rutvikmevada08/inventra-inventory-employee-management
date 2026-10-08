@@ -1,43 +1,68 @@
 const mongoose = require("mongoose");
-// mongoose.set('strictQuery',true);
 
-var reimbursementSchema = mongoose.Schema({
-  Vendor:{
-    type:String   
+var reimbursementSchema = mongoose.Schema(
+  {
+    Vendor: {
+      type: String,
+      trim: true,
+    },
+    Invoice_number: {
+      type: String,
+      trim: true,
+    },
+    employee: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "employee",
+      required: true,
+    },
+    Date: {
+      type: Date,
+      required: true,
+    },
+    Amount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    Spent_on: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    Status: {
+      type: String,
+      enum: ["Requested", "Approved", "Paid", "Rejected", "Pending", "Reimbursed"],
+      default: "Requested",
+      required: true,
+    },
+    Paid_by: {
+      type: String,
+      trim: true,
+    },
+    Invoice: {
+      type: String,
+      trim: true,
+    },
+    approvedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    approvedAt: {
+      type: Date,
+    },
+    paidAt: {
+      type: Date,
+    },
+    notes: {
+      type: String,
+      trim: true,
+    },
   },
-  Invoice_number:{
-    type:String   
-  },
-  employee: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "employee",
-    required: true,
-  },
-  Date: {
-    type: Date,
+  { timestamps: true }
+);
 
-    required: true,
-  },
-  Amount: {
-    type: Number,
-    required: true,
-  },
-  Spent_on: {
-    type: String,
-    required: true,
-  },
-  Status: {
-    type: String,
-    required: true,
-  },
-  Paid_by:{
-    type: String,
+reimbursementSchema.index({ Date: -1 });
+reimbursementSchema.index({ employee: 1 });
+reimbursementSchema.index({ Status: 1 });
 
-  },
- Invoice:{
-    type: String,
-    
-  }
-});
-
-module.exports = mongoose.model("reimbursement", reimbursementSchema);
+module.exports = mongoose.models.reimbursement || mongoose.model("reimbursement", reimbursementSchema);

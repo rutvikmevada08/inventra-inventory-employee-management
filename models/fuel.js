@@ -1,47 +1,64 @@
 const mongoose = require("mongoose");
-// mongoose.set('strictQuery',true);
 
-var fuelSchema = mongoose.Schema({
-  Vendor: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "vendor",
-    required: true,
+var fuelSchema = mongoose.Schema(
+  {
+    Vendor: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "vendor",
+      required: true,
+    },
+    Date: {
+      type: Date,
+      required: true,
+    },
+    Litre: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    Cost_per_litre: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    Total: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    Vehicle_num: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "vehicle",
+      required: true,
+    },
+    Fueled_by: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "employee",
+      required: true,
+    },
+    Invoice_number: {
+      type: String,
+      trim: true,
+    },
+    Invoice: {
+      type: String,
+      trim: true,
+    },
+    Fuel_type: {
+      type: String,
+      trim: true,
+      default: "Diesel",
+    },
+    notes: {
+      type: String,
+      trim: true,
+    },
   },
-  Date: {
-    type: Date,
+  { timestamps: true }
+);
 
-    required: true,
-  },
-  Litre: {
-    type: Number,
-    required: true,
-  },
-  Cost_per_litre: {
-    type: Number,
-    required: true,
-  },
-  Total: {
-    type: Number,
-    required: true,
-  },
-  Vehicle_num:{
-    type:mongoose.Schema.Types.ObjectId,
-    ref:'vehicle',
-    required:true,
-  },
-  Fueled_by: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "employee",
-    required: true,
-  },
-  Invoice_number:{
-    type:String,
-    
-  },
-  Invoice:{
-    type:String,
-    
-  }
-});
+fuelSchema.index({ Date: -1 });
+fuelSchema.index({ Vehicle_num: 1 });
+fuelSchema.index({ Vendor: 1 });
 
-module.exports = mongoose.model("fuel", fuelSchema);
+module.exports = mongoose.models.fuel || mongoose.model("fuel", fuelSchema);

@@ -2,35 +2,30 @@
 const nodemailer = require('nodemailer');
 
 async function sendEmail(to, subject, text) {
-    // Create a transporter
-    let transporter = nodemailer.createTransport({
-        host: 'smtppro.zoho.in',
-        // service: 'Gmail',
+    if (!process.env.SMTP_USER || !process.env.SMTP_PASSWORD) {
+        console.warn('SMTP credentials not configured. Skipping email send.');
+        return null;
+    }
 
-        port: 465,
-        secure: true,
+    let transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtppro.zoho.in',
+        port: parseInt(process.env.SMTP_PORT, 10) || 465,
+        secure: (process.env.SMTP_SECURE === 'true' || process.env.SMTP_PORT === '465'),
         auth: {
-            user: 'pulkit.upadhyay@deepeigen.com', // Your Zoho Mail email address
-            pass: 'rD1xQtsMN4nR' // Your Zoho Mail password
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASSWORD
         }
-    //     auth: {
-    //       user: 'swaayatt.interviews@gmail.com', // Your Zoho Mail email address
-    //       pass: 'zncx rxez hjcy hsny' // Your Zoho Mail password
-    //   }
     });
 
-    // Setup email data
     let mailOptions = {
-        from: 'pulkit.upadhyay@deepeigen.com', // Sender address
-        to: to, // Receiver address
-        cc:'amrita@swaayatt.com, pulkit.upadhyay@deepeigen.com',
-        subject: subject, // Subject line
-        text: text // Plain text body
+        from: process.env.SMTP_FROM || process.env.SMTP_USER,
+        to: to,
+        subject: subject,
+        text: text
     };
 
-    // Send mail with defined transport object
     let info = await transporter.sendMail(mailOptions);
-
+    return info;
 }
 
 module.exports = sendEmail;
