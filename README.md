@@ -1,375 +1,342 @@
-# Smart Inventory & Workforce Management System
+# Inventory & Workforce Management System
 
-An internal enterprise system combining inventory management, vendor procurement, stock movement ledgers, workforce attendance, daily wage calculations, monthly payroll, advance payments, fleet fuel tracking, expense claims, and document reporting.
+A web application for managing inventory, purchasing, employees, attendance, wages, and everyday business expenses in one place.
 
----
+The aim is simple: make day-to-day records easier to maintain, understand where stock goes, calculate wages consistently, and keep a reliable history of payments and business activity.
 
-## 1. Project Purpose & Overview
+## Features
 
-The **Smart Inventory & Workforce Management System** is designed for operations-heavy organizations employing daily-wage and monthly workforce alongside equipment, vehicles, and hardware inventory.
+### Dashboard
+- Inventory and workforce summaries.
+- Payroll and wage information.
+- A simple chart for reviewing wage trends.
 
-### Key Capabilities
-- **Workforce Management**: Employee directory, daily wage rates, joining history, and soft-deactivation (preserving historical auditable records).
-- **Daily Attendance**: Four-state attendance tracking (Present = 1.0 day, Half Day = 0.5 day, Absent = 0.0, Leave = 0.0) with duplicate-date prevention via compound unique indexes.
-- **Daily Wage Engine**: Server-side wage calculations where eligible days are multiplied by employee daily wage rates.
-- **Monthly Payroll**: Automated generation of draft payrolls, automatic aggregation and deduction of pending advances, finalization locking, and explicit reversal/correction workflows.
-- **Advance Payments**: Append-only advance disbursements with audit tracking and automatic reconciliation into payroll.
-- **Wage Disbursements**: Partial and multiple wage payments against finalized payrolls, strict overpayment rejection, and auditable voiding.
-- **Inventory & Stock Ledger**: Double-entry style stock ledger tracking every unit received from purchase lots and issued to workforce requests.
-- **Purchases & Lots**: Multi-item purchase invoices with supplier attachment, document upload, stock receiving into inventory, and part payments.
-- **Material Requisitions**: Workforce item requests with administrative approval and direct stock-out issuance to ledger.
-- **Operations & Fleet**: Vendor directory, fleet vehicle registry, fuel purchase tracking with invoice capture, and 4-stage reimbursement claims (Requested &rarr; Approved &rarr; Paid &rarr; Locked).
-- **Reporting & Exports**: 11 real-time reports with Excel (`.xlsx`) export via ExcelJS, PDF report generation via PDFKit, and preservation of legacy investor/inventory spreadsheet layouts.
-- **Role-Based Security**: JWT authentication with bcrypt password hashing, separating system login users (Admin/Staff) from workforce labour records.
+### Inventory and purchasing
+- Item types and stock records.
+- Purchase lots and invoice handling.
+- Stock receiving and stock-out tracking.
+- Item requests, approvals, and issuance.
+- An inventory ledger for tracing stock movements.
+- Duplicate-invoice protection and stock availability checks.
 
----
+### Employees and attendance
+- Employee records kept separate from login accounts.
+- Employee codes, contact details, department, designation, joining date, and pay type.
+- Daily attendance: present, half day, absent, and leave.
+- Daily sheets, monthly summaries, date filters, and employee history.
+- Deactivation instead of deleting important employee records.
 
-## 2. Technology Stack
+### Wages, payroll, advances, and payments
+- Daily-wage calculations based on eligible attendance.
+- Monthly payroll generation and finalization.
+- Advance tracking and payroll deductions.
+- Partial and final wage payments.
+- Remaining-balance calculations and payment history.
+- Void/reversal records for corrections, with reasons retained for auditing.
 
-- **Backend**: Node.js, Express.js, MongoDB, Mongoose 8
-- **Authentication**: JSON Web Tokens (JWT), bcryptjs (10 salt rounds)
-- **Frontend**: React 19, Vite 8, React Router v7, Axios, Custom Plain CSS (Light, Business UI - No Bootstrap, No Tailwind CSS)
-- **Document & Spreadsheet Generation**: PDFKit, ExcelJS
-- **File Uploads**: Multer (collision-safe unique file naming, strict type and size validation)
-- **Testing**: Supertest, Node Test Runner, Vitest, JSDOM
+Payroll calculations are handled by the backend. Finalized payroll figures are locked; use the supported reversal process to correct them rather than silently changing historical records.
 
----
+### Business operations
+- Vendors.
+- Vehicles and fuel logs.
+- Reimbursements.
+- General operating expenses.
 
-## 3. Architecture & User vs. Employee Model
+### Reports and exports
+Reports cover inventory, stock movements, employees, attendance, daily wages, monthly payroll, advances, payments, expenses, and fuel consumption.
 
-The application strictly separates **Authentication Users** from **Workforce Labour Records**:
-- **User (`models/User.js`)**: Represents persons who can authenticate into the application. Roles: `admin` (full permissions) and `staff` (restricted to Item Requests, Reimbursements, Fuel, and Vendors).
-- **Employee (`models/employees.js`)**: Represents physical workers, technicians, and labourers. An employee can exist without a login account, receives daily wages, takes advances, appears in payroll, and receives payments. Can optionally be linked to a User account.
+- Export supported reports to Excel (`.xlsx`) and PDF (`.pdf`).
+- Existing investor and inventory Excel exports are retained.
 
-```
-Workforce Flow:
-Employee Directory
-       ↓
-Daily Attendance (Present / Half Day / Absent / Leave)
-       ↓
-Daily Wage Engine (eligible_days = Present*1 + Half*0.5)
-       ↓
-Monthly Payroll (Draft: Gross = eligible_days × rate)
-       ↓
-Advances Deducted (Eligible advances subtracted from Gross)
-       ↓
-Net Payable (Finalized & Locked)
-       ↓
-Wage Disbursements (Partial or full payments; Overpayment protected)
-       ↓
-Paid & Settled
-```
+### Authentication and access
+- JWT-based authentication.
+- Password hashing.
+- Admin and staff roles.
+- Staff access restricted to the modules intended for staff.
+- Protected access to uploaded invoices and private files.
 
-```
-Inventory Flow:
-Catalog Item Types
-       ↓
-Purchase Lot & Invoice (Vendor + Items + Upload)
-       ↓
-Stock Receiving (Triggers STOCK_IN on Inventory Ledger)
-       ↓
-Available Stock on Hand (Derived from ledger)
-       ↓
-Workforce Item Request (Requisition)
-       ↓
-Admin Approval & Issuance (Triggers STOCK_OUT on Inventory Ledger)
-```
+## Tech stack
 
----
+**Frontend:** React, Vite, React Router, Axios, custom CSS, and Recharts.
 
-## 4. Folder Structure
+**Backend:** Node.js, Express, MongoDB, Mongoose, JWT, bcrypt, ExcelJS, and PDFKit.
 
-```
+## Project structure
+
+```text
 inventory_management/
-├── bin/
-│   └── www                    # Express server entrypoint & port binding
-├── frontend/                  # React + Vite frontend application
-│   ├── src/
-│   │   ├── __tests__/         # Frontend Vitest component & role tests
-│   │   ├── components/        # Navbar, Sidebar, Modal, Feedback states
-│   │   ├── context/           # AuthContext (JWT session state)
-│   │   ├── pages/             # Dashboard, Workforce, Inventory, Operations, Reports
-│   │   ├── api.js             # Axios client with JWT interceptor
-│   │   ├── App.jsx            # React Router shell & protected routes
-│   │   └── index.css          # Plain custom CSS design system
-│   ├── vite.config.js         # Vite configuration with API proxy & test env
-│   └── package.json           # Frontend dependencies
-├── middleware/
-│   ├── auth.js                # JWT verification and requireAdmin guards
-│   └── upload.js              # Multer storage with unique timestamps & mime filter
-├── models/
-│   ├── Advance.js             # Append-only advance payments
-│   ├── Attendance.js          # Daily attendance with compound unique index
-│   ├── Employee.js / employees.js # Workforce profiles & wage rates
-│   ├── Expense.js             # General operating business expenses
-│   ├── fuel.js                # Fleet refuel logs & receipts
-│   ├── InventoryLedger.js     # Immutable stock movement ledger
-│   ├── item_req.js            # Workforce material requisitions
-│   ├── item_types.js          # Catalog inventory classifications
-│   ├── items.js               # Lot line items
-│   ├── lots.js                # Purchase lots & invoice records
-│   ├── Payment.js             # Employee wage disbursements & voiding
-│   ├── Payroll.js             # Monthly payroll ledger with locking
-│   ├── reimbursement.js       # 4-stage reimbursement claims
-│   ├── User.js                # Authentication accounts (Admin/Staff)
-│   ├── vehicles.js            # Fleet vehicles
-│   └── vendors.js             # Supplier & vendor directory
+├── bin/                  # Server startup
+├── controllers/          # Request handlers
+├── models/               # Mongoose models
+├── routes/               # API routes
+├── services/             # Business logic
+├── scripts/              # Seed and migration scripts
+├── test/                 # Backend tests
 ├── public/
-│   └── uploads/               # Uploaded invoices & receipts (preserved)
-├── routes/
-│   ├── api/                   # REST API routes
-│   │   ├── auth.js
-│   │   ├── employees.js
-│   │   ├── attendance.js
-│   │   ├── payroll.js
-│   │   ├── advances.js
-│   │   ├── payments.js
-│   │   ├── inventory.js
-│   │   ├── itemRequests.js
-│   │   ├── vendors.js
-│   │   ├── vehicles.js
-│   │   ├── fuel.js
-│   │   ├── reimbursements.js
-│   │   ├── expenses.js
-│   │   ├── dashboard.js
-│   │   ├── reports.js
-│   │   └── files.js
-│   └── index.js               # Legacy routes preserved
-├── scripts/
-│   ├── migrate-legacy.js      # Safe migration script (Dry-run by default)
-│   ├── MIGRATION.md           # Migration safety guidelines
-│   └── seed.js                # Database seed script for initial admin & items
-├── test/
-│   └── run-all-tests.js       # End-to-end automated integration test suite
-├── app.js                     # Express app configuration & middleware
-├── .env.example               # Environment variable template
-├── .gitignore                 # Excludes node_modules, .env, build files
-└── README.md                  # Comprehensive project documentation
+│   └── uploads/          # Existing invoice and receipt files
+├── frontend/             # React + Vite application
+├── .env.example          # Environment variable template
+├── package.json
+└── README.md
 ```
 
----
+The project may contain additional modules in these folders.
 
-## 5. Prerequisites & Database Setup
+## Requirements
 
-### Prerequisites
-- **Node.js**: v18.0.0 or later (Tested on Node.js v24)
-- **MongoDB**: MongoDB Community Server v6.0+ or MongoDB Atlas cluster.
-  *(Note: FerretDB is not recommended for production due to sparse unique index and aggregation pipeline constraints).*
+- Node.js (a current LTS release is recommended)
+- npm
+- MongoDB Atlas or MongoDB Community Server
 
-### MongoDB Community Server Setup (Local)
-1. Install MongoDB Community Server from [MongoDB Download Center](https://www.mongodb.com/try/download/community).
-2. Start the MongoDB service:
-   - **Windows**: `Start-Service MongoDB` (runs as a Windows Service on `127.0.0.1:27017`).
-   - **Linux / macOS**: `sudo systemctl start mongod` or `brew services start mongodb-community`.
-3. Verify connection:
-   ```bash
-   mongosh --eval "db.adminCommand('ping')"
-   ```
+You do not need to run a local MongoDB server if you use Atlas.
 
-### MongoDB Atlas Setup (Cloud)
-1. Create a free M0 cluster at [mongodb.com/atlas](https://www.mongodb.com/atlas).
-2. Create a database user and whitelist your server's IP address (or `0.0.0.0/0` during initial setup).
-3. Copy your connection string into `.env`:
-   ```env
-   MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/inventory_management?retryWrites=true&w=majority
-   ```
+## Setup
 
----
+### 1. Open the project
 
-## 6. Environment Configuration
+Clone your repository or open the project folder in a terminal:
 
-Copy `.env.example` to `.env`:
+```bash
+cd inventory_management
+```
+
+### 2. Install dependencies
+
+Run these commands from the project root:
+
+```bash
+npm install
+npm --prefix frontend install
+```
+
+### 3. Configure MongoDB
+
+MongoDB Atlas is supported:
+
+1. Create a cluster in your Atlas account.
+2. Create a database user and password.
+3. Add your current IP address under **Network Access**.
+4. Open **Connect → Drivers** and copy the Node.js connection string.
+5. Include the database name you want to use.
+
+A connection string generally looks like this:
+
+```text
+mongodb+srv://<username>:<password>@<cluster-host>/inventory_management?retryWrites=true&w=majority
+```
+
+Replace the placeholders with your own Atlas values. If your password contains reserved URL characters, encode them before placing it in the URI.
+
+Keep your real connection string private.
+
+### 4. Configure environment variables
+
+Copy `.env.example` to `.env` in the project root.
+
+**Windows PowerShell:**
+
+```powershell
+Copy-Item .env.example .env
+```
+
+**macOS/Linux:**
+
 ```bash
 cp .env.example .env
 ```
 
-Configure your environment variables:
+Open `.env` and set the values required by the application. At minimum, check `MONGODB_URI` and `JWT_SECRET`. Use the exact variable names documented in `.env.example` and the server configuration.
+
+Example only:
+
 ```env
-# Database
-MONGODB_URI=mongodb://127.0.0.1:27017/inventory_management
-
-# Authentication
-JWT_SECRET=replace_with_a_secure_random_string_min_32_chars
-
-# Server Configuration
+MONGODB_URI=mongodb+srv://<username>:<password>@<cluster-host>/inventory_management?retryWrites=true&w=majority
+JWT_SECRET=replace_with_a_long_random_secret
 PORT=5000
-CLIENT_URL=http://localhost:5173
-
-# Business Defaults
-COMPANY_NAME=Swaayatt Robots
-DEFAULT_PAYER=Sanjeev Sharma
-
-# SMTP Email Configuration (Optional - for email notifications)
-SMTP_HOST=smtppro.zoho.in
-SMTP_PORT=465
-SMTP_USER=
-SMTP_PASSWORD=
 ```
 
----
+This example is illustrative. Keep any other required variables from `.env.example`; do not guess variable names. Never commit `.env`.
 
-## 7. Installation & Seeding
+### 5. Initialize the database
 
-1. **Install Backend Dependencies**:
-   ```bash
-   npm install
-   ```
+First, confirm that `MONGODB_URI` points to your own intended database. Then run:
 
-2. **Install Frontend Dependencies**:
-   ```bash
-   npm --prefix frontend install
-   ```
+```bash
+npm run seed
+```
 
-3. **Seed Initial Administrator & Catalog Items**:
-   ```bash
-   npm run seed
-   ```
-   This creates:
-   - **Default Admin Account**: `admin@company.com` / `Admin@123`
-   - **Default Staff Account**: `staff@company.com` / `Staff@123`
-   - Initial 36 standard engineering item classifications.
+The seed script initializes default application data, including initial user accounts and standard inventory item types. Check `scripts/seed.js` and its terminal output for the exact seed behavior and login details.
 
----
+Only run the seed against a database you intend to initialize. Do not run it against a legacy or production database without reviewing the script and making an appropriate backup.
 
-## 8. Running the Application
+## Run the application
 
-### Development Mode (Concurrent Frontend + Backend)
+Use two terminals during development.
 
-Start the Express API backend:
+### Terminal 1: backend
+
+From the project root:
+
 ```bash
 npm run server
 ```
-*Backend runs on `http://localhost:5000`.*
 
-In a separate terminal, start the Vite development server:
+The backend normally listens on port `5000`.
+
+### Terminal 2: frontend
+
+From the project root:
+
 ```bash
 npm run client
 ```
-*Frontend runs on `http://localhost:5173` with automated API proxying.*
 
-### Production Mode
+Vite normally serves the frontend at:
 
-1. **Build the Frontend**:
-   ```bash
-   npm run build
-   ```
-   *Compiles React application into `frontend/dist`.*
+```text
+http://localhost:5173
+```
 
-2. **Start the Production Server**:
-   ```bash
-   npm start
-   ```
-   *Express automatically serves the React production bundle, handles SPA client routing, and secures `/api` routes on port `5000`.*
+The frontend is configured to communicate with the backend. If either service uses a different port or URL, check the environment and Vite configuration.
 
----
+> **Note:** Use `npm run server` to start the backend. The root project does not define an `npm run dev` script. `npm run client` starts the frontend development server.
 
-## 9. Testing & Quality Assurance
+## Production build
 
-### Run Backend & End-to-End Workflow Tests
+Build the frontend:
+
+```bash
+npm run build
+```
+
+Then start the application:
+
+```bash
+npm start
+```
+
+The Express server is configured to serve the production frontend build. By default, open:
+
+```text
+http://localhost:5000
+```
+
+## Tests
+
+Run the backend test suite:
+
 ```bash
 npm test
 ```
-The test suite executes 36 automated verification steps against real MongoDB:
-- Authentication & JWT issuance
-- Role-based authorization & staff route blocking
-- Workforce registration & daily wage configuration
-- Attendance eligible days calculation (`Present` = 1.0, `Half Day` = 0.5)
-- Duplicate attendance rejection via unique compound index
-- Server-side daily wages computation
-- Monthly payroll generation (`Gross` &ndash; `Advances` = `Net Payable`)
-- Finalization locking of payroll and deduction of pending advances
-- Partial disbursements and overpayment rejection
-- Settlement to `Paid` status and payment voiding / balance reopening
-- Catalog item creation and multi-item purchase lots
-- Stock receiving (`STOCK_IN`) and stock ledger balance updates
-- Duplicate stock receipt rejection
-- Material requests and stock-out issuance (`STOCK_OUT`)
-- Vehicle registry, refuel logs, and fuel expense aggregations
-- 4-stage reimbursement claims (`Requested` &rarr; `Approved` &rarr; `Paid` &rarr; `Locked`)
-- Operational expenses tracking
-- All 11 report analytics compilations
-- Excel (`.xlsx`) export generation
-- PDF report generation
-- Preserved legacy inventory spreadsheet export
 
-### Run Frontend Component & Accessibility Tests
+Run the frontend tests:
+
 ```bash
 npm --prefix frontend test
 ```
-Runs Vitest and JSDOM component tests verifying login inputs, role-based navigation rendering, and clean UI without emojis.
 
----
-
-## 10. Data Migration (Safe Dry-Run by Default)
-
-The migration utility safely transfers records from legacy databases.
-
-### Safety Principles
-1. **Dry-Run by Default**: Inspects legacy documents and files without modifying any database.
-2. **Explicit Opt-in**: Modifications are only applied when `--apply` is passed.
-3. **Never Deletes Legacy Data**: Legacy collections remain untouched.
-4. **Bcrypt Hashing**: Plaintext passwords from the legacy system are automatically hashed with 10 bcrypt salt rounds.
-5. **Invoice File Integrity**: Verifies existing files in `public/uploads/` on disk without renaming or overwriting them.
+Build the frontend separately if needed:
 
 ```bash
-# 1. Perform Dry-Run (Read-only)
-node scripts/migrate-legacy.js
-
-# 2. Apply Migration
-node scripts/migrate-legacy.js --apply
+npm run build
 ```
 
----
+The Antigravity implementation report recorded **36 backend integration tests passed**, **5 frontend tests passed**, and a successful production build in its test environment. These are reported results; run the commands above on your own checkout to confirm the current code and configuration.
 
-## 11. Security Implementation
+Use a separate test database for database-specific testing. Never point tests at a database containing production or business data. If the test suite supports `TEST_MONGODB_URI`, set it to a dedicated test database according to the test configuration.
 
-- **Password Security**: Passwords hashed with `bcryptjs` (salt factor 10).
-- **JWT Authorization**: 12-hour signed JWT tokens with user payload and role enforcement.
-- **Role-Based Guards**: Backend middleware (`requireAdmin`, `requireStaffOrAdmin`) protects sensitive employee wages, payroll, and payment management.
-- **Secure File Uploads**: Multer generates collision-safe filenames (`Date.now() + crypto.randomBytes`), enforces an extension whitelist (`.jpg`, `.jpeg`, `.png`, `.pdf`, `.webp`), and caps upload size at 25MB.
-- **Private Document Delivery**: The `/api/files/uploads/:filename` route requires active JWT authentication to prevent public exposure of invoices.
-- **Directory Traversal Protection**: File paths are sanitized using `path.basename`.
-- **Zero Secrets in Repository**: No passwords, API keys, or database credentials are committed.
+## Main workflows
 
----
+### Inventory
 
-## 12. User Roles & Permissions Matrix
+1. Create or select a purchase lot.
+2. Record the received items.
+3. Review the stock ledger and current stock.
+4. Submit an item request.
+5. Approve the request with the appropriate role.
+6. Issue the items and verify the stock-out entry.
 
-| Module / Action | Staff | Administrator |
-|---|:---:|:---:|
-| System Logins & Users | No | Full Access |
-| Workforce Directory | View Only | Create, Edit, Deactivate |
-| Attendance Tracking | View Only | Mark Daily, Bulk Update |
-| Daily Wage Calculations | View Only | View, Filter |
-| Monthly Payroll Ledger | No Access | Generate, Finalize, Unlock |
-| Advance Wage Payments | No Access | Disburse, Reconcile |
-| Wage Disbursements | No Access | Disburse, Void, Settle |
-| Stock Overview | View | View |
-| Stock Ledger (Audit) | No Access | Full Audit History |
-| Purchase Lots & Receiving | No Access | Create Lot, Receive Stock |
-| Catalog Item Types | View | Create, Manage |
-| Material Requisitions | Submit Request | Approve, Reject, Issue Stock |
-| Vendor Directory | View, Search | Register, Edit |
-| Fleet Vehicles | View Only | Register, Manage |
-| Fuel Purchase Logs | Log Refuel | Full Management & Totals |
-| Expense Reimbursements | Submit Claim | Approve, Disburse, Lock |
-| General Business Expenses | No Access | Record, Manage |
-| Reports & Excel/PDF Exports | View, Export | Full Access |
+Stock movements should be traceable through inventory transactions, not unexplained changes to a total.
 
----
+### Employee wages
 
-## 13. GitHub Readiness Checklist
+1. Create an employee record.
+2. Record attendance for the relevant dates.
+3. Generate payroll for the employee and month.
+4. Review and finalize the calculated figures.
+5. Record advances and payments as appropriate.
+6. Use payment history to check the remaining balance.
 
-- [x] `.gitignore` configured to exclude `node_modules/`, `.env`, `dist/`, logs, and large archives
-- [x] `.env.example` created with placeholders only
-- [x] No hardcoded passwords, credentials, or secrets in code
-- [x] Legacy ~92MB invoice files safely preserved in `public/uploads/` without Git tracking
-- [x] Both backend and frontend automated test suites passing (36/36 backend tests, 5/5 frontend tests)
-- [x] Production frontend build verified (`dist/index.html` built cleanly)
-- [x] Migration script verified dry-run by default
+The basic calculations for daily-wage employees are:
 
----
+```text
+Gross wage = Eligible days × Daily wage
+Net payable = Gross wage − Advances − Deductions
+Remaining balance = Net payable − Valid payments
+```
 
-## 14. License & Credits
+Present counts as one eligible day, half day as half a day, and absent or unpaid leave as zero eligible days. The backend is the source of truth for calculations.
 
-Developed for internal operations and enterprise asset management. Proprietary business software.
+## Data integrity and migration
+
+The application is designed to retain an audit trail for important inventory and financial activity:
+
+- Historical payments should be voided or reversed through supported actions, not physically deleted.
+- Payroll corrections should use the supported reversal process.
+- Inventory movements should remain traceable.
+- Important records use deactivation or reversal where appropriate.
+- Database indexes protect key operations from duplicate records.
+
+The legacy migration script is **dry-run by default**. Review `scripts/MIGRATION.md` and the migration script before using it. Test migration against a copy of the old data first, inspect the report, and use the explicit `--apply` option only after confirming the target database and migration plan.
+
+Do not assume a migration has completed just because the application starts.
+
+## Uploaded invoices and deployment
+
+The existing `public/uploads/` directory contains legacy invoices and receipts and is intentionally excluded from normal Git commits.
+
+- Do not delete or replace these files during cleanup.
+- Keep a backup before moving or deploying the project.
+- For cloud deployment, use persistent storage and copy or mount the existing files as needed.
+- Confirm that file access rules work in the deployed environment.
+- Do not rely on an ephemeral container filesystem for permanent invoice storage.
+
+## Security checklist
+
+Before deploying publicly or making the repository public:
+
+- Keep `.env` out of Git.
+- Use a long, randomly generated JWT secret.
+- Give the MongoDB database user only the permissions the app needs.
+- Restrict Atlas Network Access rather than leaving broad access enabled indefinitely.
+- Change or remove development/default login credentials.
+- Confirm no real passwords, connection strings, API keys, or private files are tracked by Git.
+- Configure the allowed frontend origin correctly.
+- Use HTTPS in production.
+- Keep dependencies updated and review authentication and file-access behavior before deployment.
+
+Do not publish real business invoices or customer or employee information in the repository.
+
+## Current limitations
+
+The Antigravity report notes that some areas still need real-world verification:
+
+- Check the user interface and mobile layout in a browser.
+- Migration has not been verified on the actual legacy business database.
+- Re-run tests against the MongoDB version used by your deployment.
+- Paid leave, holidays and weekly offs, automatic monthly-salary proration, statutory deductions, and email-based password reset are not modelled.
+- Existing uploaded files require persistent storage when deployed.
+
+Review these limitations against your business requirements before using the system for live financial operations.
+
+## Contributing
+
+1. Create a branch for your changes.
+2. Keep secrets and private business data out of commits.
+3. Run the backend tests, frontend tests, and production build.
+4. Test the affected business workflow before opening a pull request.
+5. Document changes to environment variables or setup commands.
+
+## License
+
+Add the license you intend to use before distributing this project publicly.
