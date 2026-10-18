@@ -1,6 +1,13 @@
 // Each module adds its entry here. `roles` omitted means every signed-in user; `section` entries are group headings.
 export const navigation = [
   { to: '/', label: 'Dashboard', end: true },
+  { section: 'Workforce', roles: ['admin'] },
+  { to: '/employees', label: 'Employees', roles: ['admin'] },
+  { to: '/attendance', label: 'Attendance', roles: ['admin'] },
+  { to: '/daily-wages', label: 'Daily wages', roles: ['admin'] },
+  { to: '/payroll', label: 'Monthly payroll', roles: ['admin'] },
+  { to: '/advances', label: 'Advances', roles: ['admin'] },
+  { to: '/payments', label: 'Payments', roles: ['admin'] },
   { section: 'Inventory' },
   { to: '/stock', label: 'Stock', roles: ['admin'] },
   { to: '/ledger', label: 'Stock ledger', roles: ['admin'] },
@@ -10,9 +17,11 @@ export const navigation = [
   { section: 'Expenses' },
   { to: '/reimbursements', label: 'Reimbursements' },
   { to: '/fuel', label: 'Fuel' },
+  { to: '/expenses', label: 'Operating expenses', roles: ['admin'] },
   { to: '/vehicles', label: 'Vehicles', roles: ['admin'] },
   { to: '/vendors', label: 'Vendors' },
   { section: 'Administration', roles: ['admin'] },
+  { to: '/reports', label: 'Reports', roles: ['admin'] },
   { to: '/exports', label: 'Excel exports', roles: ['admin'] },
   { to: '/users', label: 'Users', roles: ['admin'] },
 ];

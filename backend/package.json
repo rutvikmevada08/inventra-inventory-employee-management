@@ -26,7 +26,8 @@
     "mongoose": "^8.24.5",
     "morgan": "^1.12.1",
     "multer": "^2.4.0",
-    "nodemailer": "^10.0.15"
+    "nodemailer": "^10.0.15",
+    "pdfkit": "^0.15.0"
   },
   "devDependencies": {
     "supertest": "^7.3.1"

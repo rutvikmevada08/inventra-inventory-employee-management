@@ -17,7 +17,7 @@ export const Attendance = () => {
     try {
       setLoading(true);
       setError("");
-      const res = await API.get("/attendance/daily-status", { params: { date: selectedDate } });
+      const res = await API.get("/attendance/status", {params: { date: selectedDate },});
       const list = res.data.employees || [];
       // Initialize editable state
       const initialized = list.map((item) => ({

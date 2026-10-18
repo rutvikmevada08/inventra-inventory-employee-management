@@ -136,7 +136,18 @@ exports.receive = asyncHandler(async (req, res) => {
   lot.receivedAt = new Date();
   await lot.save();
   await stock.receiveLot(lot, req.user._id);
-  ok(res, lot);
+  ok(res, lot, null, 200, { lot });
+});
+
+exports.receiveLegacy = asyncHandler(async (req, res) => {
+  const lot = await findLot(req.params.id);
+  if (lot.isActive === false) throw new ApiError(400, 'This lot has been cancelled');
+  if (lot.received) throw new ApiError(400, 'Duplicate action rejected: this purchase lot is already received');
+  lot.received = true;
+  lot.receivedAt = new Date();
+  await lot.save();
+  await stock.receiveLot(lot, req.user._id);
+  ok(res, lot, null, 200, { lot });
 });
 
 async function appendPayment(lot, { amount, date, method, reference, note }, userId) {
@@ -151,14 +162,16 @@ async function appendPayment(lot, { amount, date, method, reference, note }, use
 exports.addPayment = asyncHandler(async (req, res) => {
   const lot = await findLot(req.params.id);
   if (lot.isActive === false) throw new ApiError(409, 'This lot has been cancelled');
-  ok(res, await appendPayment(lot, req.body, req.user._id), null, 201);
+  const updated = await appendPayment(lot, req.body, req.user._id);
+  ok(res, updated, null, 201, { lot: updated });
 });
 
 // The old "mark as clear" button: pays whatever is left, but as a recorded payment.
 exports.markClear = asyncHandler(async (req, res) => {
   const lot = await findLot(req.params.id);
   if (lot.balance <= 0) throw new ApiError(409, 'This lot is already fully paid');
-  ok(res, await appendPayment(lot, { ...req.body, amount: lot.balance, note: req.body.note || 'Marked as cleared' }, req.user._id));
+  const updated = await appendPayment(lot, { ...req.body, amount: lot.balance, note: req.body.note || 'Marked as cleared' }, req.user._id);
+  ok(res, updated, null, 200, { lot: updated });
 });
 
 exports.deactivate = asyncHandler(async (req, res) => {

@@ -223,8 +223,12 @@ const writeToExcel = async (data, fuelData, reimbursementData, res, req) => {
     res.end();
   } catch (error) {
     console.error("Error sending Excel file:", error);
-    req.flash("error", "Something went wrong while generating the Excel file.");
-    res.redirect("/get-sheets");
+    if (typeof req.flash === "function") {
+      req.flash("error", "Something went wrong while generating the Excel file.");
+    }
+    if (!res.headersSent) {
+      res.status(500).json({ error: "Something went wrong while generating the Excel file." });
+    }
   }
 };
 

@@ -19,7 +19,7 @@ export const EmptyState = ({ title = "No records found", message = "There is no 
 export const ErrorMessage = ({ message, onDismiss }) => {
   if (!message) return null;
   return (
-    <div className="alert alert-error">
+    <div className="alert alert-error" role="alert">
       <span>{message}</span>
       {onDismiss && (
         <button className="alert-close" onClick={onDismiss}>

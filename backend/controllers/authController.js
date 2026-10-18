@@ -21,10 +21,21 @@ exports.login = asyncHandler(async (req, res) => {
 
   user.lastLoginAt = new Date();
   await user.save();
-  ok(res, { token: signToken(user), user });
+  const token = signToken(user);
+  res.status(200).json({
+    success: true,
+    message: 'Login successful',
+    token,
+    user,
+    data: { token, user },
+  });
 });
 
-exports.me = (req, res) => ok(res, req.user);
+exports.me = (req, res) => res.status(200).json({
+  success: true,
+  user: req.user,
+  data: req.user,
+});
 
 exports.changePassword = asyncHandler(async (req, res) => {
   const { currentPassword, newPassword } = req.body;

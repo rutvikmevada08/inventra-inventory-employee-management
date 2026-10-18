@@ -19,14 +19,14 @@ exports.list = asyncHandler(async (req, res) => {
     User.find(filter).sort({ name: 1 }).skip(p.skip).limit(p.limit),
     User.countDocuments(filter),
   ]);
-  ok(res, rows, pageMeta(p, total));
+  res.status(200).json({ success: true, users: rows, data: rows, meta: pageMeta(p, total) });
 });
 
 exports.create = asyncHandler(async (req, res) => {
   const user = new User(pick(req.body, FIELDS));
   if (req.body.password) await user.setPassword(req.body.password);
   await user.save();
-  ok(res, user, null, 201);
+  res.status(201).json({ success: true, message: 'User created successfully', user, data: user });
 });
 
 exports.update = asyncHandler(async (req, res) => {
@@ -63,4 +63,24 @@ exports.reactivate = asyncHandler(async (req, res) => {
   if (!user) throw new ApiError(404, 'User not found');
   await user.reactivate();
   ok(res, user);
+});
+
+exports.toggle = asyncHandler(async (req, res) => {
+  const user = await User.findById(assertId(req.params.id));
+  if (!user) throw new ApiError(404, 'User not found');
+  if (user.id === req.user.id) throw new ApiError(409, 'You cannot deactivate your own account');
+  if (user.isActive !== false) {
+    if (user.role === 'admin' && (await activeAdminCount()) <= 1) {
+      throw new ApiError(409, 'There must be at least one active admin');
+    }
+    await user.deactivate(req.user._id);
+  } else {
+    await user.reactivate();
+  }
+  res.status(200).json({
+    success: true,
+    message: `User ${user.isActive ? 'activated' : 'deactivated'} successfully.`,
+    user,
+    data: user,
+  });
 });

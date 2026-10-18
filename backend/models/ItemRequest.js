@@ -11,10 +11,26 @@ const itemRequestSchema = new mongoose.Schema(
     decidedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     decidedAt: Date,
     rejectionReason: { type: String, trim: true },
-    // false for requests approved before the stock ledger existed, or for service types.
     stockIssued: { type: Boolean, default: false },
+    employee: { type: mongoose.Schema.Types.ObjectId, ref: 'Employee' },
+    issuedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    issuedAt: Date,
   },
-  { timestamps: true }
+  { timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } }
 );
+
+itemRequestSchema.virtual('Employee').get(function () { return this.employee || this.requestedBy; });
+itemRequestSchema.virtual('item').get(function () { return this.itemType; });
+itemRequestSchema.virtual('Quantity').get(function () { return this.quantity; });
+itemRequestSchema.virtual('Date').get(function () { return this.date; });
+itemRequestSchema.virtual('Status').get(function () {
+  if (this.stockIssued) return 'Issued';
+  if (this.status) {
+    return this.status.charAt(0).toUpperCase() + this.status.slice(1);
+  }
+  return this.status;
+});
+itemRequestSchema.virtual('approvedBy').get(function () { return this.decidedBy; });
+itemRequestSchema.virtual('approvedAt').get(function () { return this.decidedAt; });
 
 module.exports = mongoose.model('ItemRequest', itemRequestSchema);

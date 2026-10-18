@@ -16,12 +16,18 @@ exports.stockList = asyncHandler(async (req, res) => {
     const b = bal.get(String(t._id)) || { balance: 0 };
     return {
       _id: t._id, name: t.name, unit: t.unit, reorderLevel: t.reorderLevel,
-      balance: b.balance, lastMovement: null,
+      balance: b.balance, currentStock: b.balance,
+      itemType: { _id: t._id, name: t.name, unit: t.unit, Type_name: t.name },
+      lastMovement: null,
       lowStock: t.reorderLevel > 0 && b.balance <= t.reorderLevel,
     };
   });
   if (req.query.lowStock === 'true') rows = rows.filter((r) => r.lowStock);
-  const sorters = { balance: (a, b) => a.balance - b.balance, name: (a, b) => a.name.localeCompare(b.name) };
+  const sorters = {
+  balance: (a, b) => a.balance - b.balance,
+  name: (a, b) =>
+    String(a.name ?? "").localeCompare(String(b.name ?? ""))
+};
   rows.sort(sorters[req.query.sort] || sorters.name);
 
   const p = paging(req.query, 25);
@@ -30,12 +36,13 @@ exports.stockList = asyncHandler(async (req, res) => {
     const last = await InventoryTransaction.findOne({ itemType: r._id }).sort({ date: -1 }).select('date').lean();
     r.lastMovement = last?.date || null;
   }));
-  ok(res, pageRows, { ...pageMeta(p, rows.length), lowStockCount: rows.filter((r) => r.lowStock).length });
+  ok(res, pageRows, { ...pageMeta(p, rows.length), lowStockCount: rows.filter((r) => r.lowStock).length }, 200, { stock: pageRows });
 });
 
 exports.transactions = asyncHandler(async (req, res) => {
   const filter = { ...dateRange(req.query, 'date') };
-  if (req.query.itemType) filter.itemType = assertId(req.query.itemType, 'item type');
+  const itemId = req.query.itemType || req.query.itemTypeId;
+  if (itemId) filter.itemType = assertId(itemId, 'item type');
   if (req.query.type) filter.type = req.query.type;
   if (req.query.source) filter.source = req.query.source;
   const p = paging(req.query);
@@ -44,7 +51,7 @@ exports.transactions = asyncHandler(async (req, res) => {
       .sort({ date: -1, createdAt: -1 }).skip(p.skip).limit(p.limit),
     InventoryTransaction.countDocuments(filter),
   ]);
-  ok(res, rows, pageMeta(p, total));
+  ok(res, rows, pageMeta(p, total), 200, { ledger: rows });
 });
 
 // Manual correction (damage, count difference, opening stock). A reason is mandatory.
