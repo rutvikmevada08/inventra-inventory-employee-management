@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const ApiError = require('./ApiError');
 
-const ok = (res, data, meta, status = 200) => res.status(status).json({ success: true, data, ...(meta && { meta }) });
+const ok = (res, data, meta, status = 200, extra = {}) => res.status(status).json({ success: true, data, ...(meta && { meta }), ...(extra || {}) });
 
 function paging(query, defaultLimit = 20) {
   const page = Math.max(parseInt(query.page, 10) || 1, 1);

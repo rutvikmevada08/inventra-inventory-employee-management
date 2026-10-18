@@ -38,6 +38,15 @@ userSchema.methods.checkPassword = function checkPassword(plain) {
   return this.passwordHash ? bcrypt.compare(plain, this.passwordHash) : Promise.resolve(false);
 };
 
+userSchema.methods.comparePassword = function comparePassword(plain) {
+  return this.checkPassword(plain);
+};
+
+userSchema.statics.hashPassword = async function hashPassword(plain) {
+  const salt = await bcrypt.genSalt(10);
+  return bcrypt.hash(plain, salt);
+};
+
 userSchema.set('toJSON', {
   transform: (doc, ret) => {
     delete ret.passwordHash;

@@ -1,15 +1,21 @@
 {
-  "name": "sanjeev",
-  "version": "0.0.0",
+  "name": "smart-inventory-workforce-system",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www",
-    "server": "node ./bin/www",
-    "client": "npm --prefix frontend run dev",
+    "start": "node backend/server.js",
+    "server": "node backend/server.js",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "npm --prefix backend run dev",
     "build": "npm --prefix frontend run build",
-    "seed": "node scripts/seed.js",
-    "migrate": "node scripts/migrate-legacy.js",
-    "test": "node test/run-all-tests.js"
+    "test": "node test/run-all-tests.js && npm --prefix backend test && npm --prefix frontend test -- --run",
+    "test:backend": "npm --prefix backend test",
+    "test:frontend": "npm --prefix frontend test -- --run",
+    "test:integration": "node test/run-all-tests.js",
+    "create-admin": "npm --prefix backend run create-admin",
+    "migrate:legacy": "npm --prefix backend run migrate:legacy",
+    "seed": "node scripts/seed.js"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

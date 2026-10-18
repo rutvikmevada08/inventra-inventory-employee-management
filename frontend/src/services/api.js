@@ -1,12 +1,22 @@
 import axios from 'axios';
 
 const TOKEN_KEY = 'sim_token';
+const LEGACY_TOKEN_KEY = 'token';
 
 // The token is the only thing kept in the browser. There are no keys or secrets in the frontend.
 export const tokenStore = {
-  get: () => localStorage.getItem(TOKEN_KEY),
-  set: (token) => localStorage.setItem(TOKEN_KEY, token),
-  clear: () => localStorage.removeItem(TOKEN_KEY),
+  get: () => localStorage.getItem(TOKEN_KEY) || localStorage.getItem(LEGACY_TOKEN_KEY),
+  set: (token) => {
+    if (token) {
+      localStorage.setItem(TOKEN_KEY, token);
+      localStorage.setItem(LEGACY_TOKEN_KEY, token);
+    }
+  },
+  clear: () => {
+    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(LEGACY_TOKEN_KEY);
+    localStorage.removeItem('user');
+  },
 };
 
 const api = axios.create({ baseURL: import.meta.env.VITE_API_URL || '/api' });
@@ -38,6 +48,7 @@ export const fieldErrors = (err) => err.response?.data?.errors || {};
 
 export function errorMessage(err) {
   if (err.response?.data?.message) return err.response.data.message;
+  if (err.response?.data?.error) return err.response.data.error;
   if (err.code === 'ERR_NETWORK') return 'Cannot reach the server. Check your connection and try again.';
   return 'Something went wrong. Please try again.';
 }

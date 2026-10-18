@@ -42,6 +42,16 @@ lotSchema.index({ vendor: 1, invoiceNumber: 1 });
 lotSchema.virtual('balance').get(function balance() {
   return round2(this.totalPayable - this.totalPaid);
 });
+lotSchema.virtual('Vendor').get(function () { return this.vendor; });
+lotSchema.virtual('Purchase_date').get(function () { return this.purchaseDate; });
+lotSchema.virtual('Invoice_number').get(function () { return this.invoiceNumber; });
+lotSchema.virtual('Total_payable').get(function () { return this.totalPayable; });
+lotSchema.virtual('Total_paid').get(function () { return this.totalPaid; });
+lotSchema.virtual('Received').get(function () { return this.received; });
+lotSchema.virtual('Invoice').get(function () { return this.invoiceFile; });
+lotSchema.virtual('Lot_type').get(function () { return this.lotType; });
+lotSchema.virtual('Paid_by').get(function () { return this.paidBy; });
+lotSchema.virtual('Description').get(function () { return this.description; });
 lotSchema.pre('validate', function checkPaid(next) {
   if (this.totalPaid > this.totalPayable + 0.005) {
     this.invalidate('totalPaid', 'Total paid cannot exceed total payable');

@@ -1,61 +1,76 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
-import API from "../api";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import api, { tokenStore, setUnauthorizedHandler } from '../services/api';
 
 const AuthContext = createContext(null);
 
-export const AuthProvider = ({ children }) => {
+export function AuthProvider({ children }) {
   const [user, setUser] = useState(() => {
     try {
-      const stored = localStorage.getItem("user");
+      const stored = localStorage.getItem('user');
       return stored ? JSON.parse(stored) : null;
-    } catch (e) {
+    } catch {
       return null;
     }
   });
-  const [token, setToken] = useState(() => localStorage.getItem("token"));
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(tokenStore.get() && !user));
+
+  const logout = useCallback(() => {
+    tokenStore.clear();
+    localStorage.removeItem('user');
+    setUser(null);
+  }, []);
 
   useEffect(() => {
-    const verifyUser = async () => {
-      if (token) {
-        try {
-          const res = await API.get("/auth/me");
-          setUser(res.data.user);
-          localStorage.setItem("user", JSON.stringify(res.data.user));
-        } catch (err) {
-          logout();
-        }
-      }
+    setUnauthorizedHandler(logout);
+    const token = tokenStore.get();
+    if (!token) {
       setLoading(false);
-    };
-    verifyUser();
-  }, [token]);
+      return;
+    }
+    api.get('/auth/me')
+      .then((res) => {
+        const u = res.data?.data?.user || res.data?.data || res.data?.user;
+        setUser(u);
+        if (u) {
+          try {
+            localStorage.setItem('user', JSON.stringify(u));
+          } catch {}
+        }
+      })
+      .catch(() => {
+        tokenStore.clear();
+        localStorage.removeItem('user');
+        setUser(null);
+      })
+      .finally(() => setLoading(false));
+  }, [logout]);
 
-  const login = async (email, password) => {
-    const res = await API.post("/auth/login", { email, password });
-    const { token: newToken, user: newUser } = res.data;
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("user", JSON.stringify(newUser));
-    setToken(newToken);
-    setUser(newUser);
-    return newUser;
-  };
+  const login = useCallback(async (email, password) => {
+    const res = await api.post('/auth/login', { email, password });
+    const payload = res.data?.data || res.data;
+    const token = payload?.token || res.data?.token;
+    const userData = payload?.user || res.data?.user;
+    if (token) tokenStore.set(token);
+    if (userData) {
+      setUser(userData);
+      try {
+        localStorage.setItem('user', JSON.stringify(userData));
+      } catch {}
+    }
+    return userData;
+  }, []);
 
-  const logout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setToken(null);
-    setUser(null);
-  };
+  const value = useMemo(() => ({
+    user,
+    token: tokenStore.get(),
+    loading,
+    login,
+    logout,
+    isAdmin: user?.role === 'admin',
+    isStaff: user?.role === 'staff',
+  }), [user, loading, login, logout]);
 
-  const isAdmin = user && user.role === "admin";
-  const isStaff = user && user.role === "staff";
-
-  return (
-    <AuthContext.Provider value={{ user, token, loading, login, logout, isAdmin, isStaff }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
 
 export const useAuth = () => useContext(AuthContext);

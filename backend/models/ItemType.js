@@ -15,4 +15,13 @@ const itemTypeSchema = new mongoose.Schema(
 itemTypeSchema.plugin(softDelete);
 itemTypeSchema.index({ name: 1 });
 
+itemTypeSchema.virtual('Type_name').get(function () {
+  return this.name;
+}).set(function (v) {
+  this.name = v;
+});
+
+itemTypeSchema.set('toJSON', { virtuals: true });
+itemTypeSchema.set('toObject', { virtuals: true });
+
 module.exports = mongoose.model('ItemType', itemTypeSchema);

@@ -142,8 +142,9 @@ const write_inventory_data = (data, res, req) => {
   worksheet.columns = columnWidths;
   // Save Excel file
   let d = new Date();
-  d = formatDateToDDMMYYYY(d);
-  req.flash("message", "The investor sheet is being downloaded");
+  if (typeof req.flash === "function") {
+    req.flash("message", "The investor sheet is being downloaded");
+  }
   res.setHeader(
     "Content-Type",
     "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"

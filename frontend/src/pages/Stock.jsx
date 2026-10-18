@@ -1,147 +1,104 @@
-import React, { useEffect, useState } from "react";
-import API from "../api";
-import { Link } from "react-router-dom";
-import { LoadingSpinner, EmptyState, ErrorMessage } from "../components/Feedback";
+import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import api, { errorMessage } from '../services/api';
+import useFetch from '../hooks/useFetch';
+import useFilters from '../hooks/useFilters';
+import PageHeader from '../components/PageHeader';
+import DataTable from '../components/DataTable';
+import Pagination from '../components/Pagination';
+import Alert from '../components/Alert';
+import Badge from '../components/Badge';
+import Modal from '../components/Modal';
+import Field from '../components/Field';
+import { formatDate, formatQty } from '../utils/format';
 
-export const Stock = () => {
-  const [stock, setStock] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [search, setSearch] = useState("");
+function AdjustModal({ item, onDone, onCancel }) {
+  const [form, setForm] = useState({ direction: 'out', quantity: '', reason: '' });
+  const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const fetchStock = async () => {
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!(Number(form.quantity) > 0)) return setError('Enter a quantity greater than zero');
+    if (!form.reason.trim()) return setError('A reason is required for every adjustment');
+    setBusy(true);
+    setError('');
     try {
-      setLoading(true);
-      setError("");
-      const res = await API.get("/inventory/stock");
-      setStock(res.data.stock || []);
+      await api.post('/inventory/adjustments', { itemType: item._id, direction: form.direction, quantity: Number(form.quantity), reason: form.reason });
+      onDone(`Stock for ${item.name} adjusted.`);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to load inventory stock.");
-    } finally {
-      setLoading(false);
+      setError(errorMessage(err));
+      setBusy(false);
     }
   };
 
-  useEffect(() => {
-    fetchStock();
-  }, []);
+  return (
+    <Modal
+      title={`Adjust stock: ${item.name}`} onClose={onCancel}
+      footer={<><button type="button" className="btn" onClick={onCancel} disabled={busy}>Cancel</button><button type="submit" form="adjust-form" className="btn btn-primary" disabled={busy}>Record adjustment</button></>}
+    >
+      <Alert tone="danger">{error}</Alert>
+      <p className="muted" style={{ marginBottom: 14 }}>Currently in stock: {formatQty(item.balance)} {item.unit}. Adjustments are added to the ledger and cannot be edited later.</p>
+      <form id="adjust-form" onSubmit={submit} noValidate>
+        <div className="form-grid">
+          <Field label="Adjustment">
+            <select className="select" value={form.direction} onChange={(e) => setForm({ ...form, direction: e.target.value })}>
+              <option value="out">Remove from stock</option>
+              <option value="in">Add to stock</option>
+            </select>
+          </Field>
+          <Field label={`Quantity (${item.unit})`} required>
+            <input className="input" type="number" min="0" step="any" value={form.quantity} onChange={(e) => setForm({ ...form, quantity: e.target.value })} autoFocus />
+          </Field>
+          <Field label="Reason" required className="full" hint="For example: damaged in storage, stock count correction, opening stock">
+            <input className="input" value={form.reason} onChange={(e) => setForm({ ...form, reason: e.target.value })} />
+          </Field>
+        </div>
+      </form>
+    </Modal>
+  );
+}
 
-  const filtered = stock.filter((s) => {
-    if (!search) return true;
-    const name = s.itemType?.Type_name || "";
-    const cat = s.itemType?.category || "";
-    return name.toLowerCase().includes(search.toLowerCase()) || cat.toLowerCase().includes(search.toLowerCase());
-  });
+export default function Stock() {
+  const { filters, set, page, setPage, params } = useFilters({ q: '', lowStock: false, sort: 'name' });
+  const { data, meta, loading, error, reload } = useFetch('/inventory', { ...params, limit: 25 });
+  const [adjusting, setAdjusting] = useState(null);
+  const [notice, setNotice] = useState(null);
 
-  const totalQuantity = stock.reduce((sum, s) => sum + (s.currentStock || 0), 0);
-  const totalValue = stock.reduce((sum, s) => sum + (s.totalValue || 0), 0);
+  const columns = [
+    { key: 'name', header: 'Item' },
+    { key: 'balance', header: 'In stock', align: 'num', render: (r) => `${formatQty(r.balance)} ${r.unit || ''}` },
+    { key: 'reorderLevel', header: 'Reorder level', align: 'num', render: (r) => (r.reorderLevel > 0 ? formatQty(r.reorderLevel) : '-') },
+    { key: 'status', header: 'Status', render: (r) => (r.lowStock ? <Badge tone="danger">Low stock</Badge> : <span className="muted">OK</span>) },
+    { key: 'lastMovement', header: 'Last movement', render: (r) => formatDate(r.lastMovement) },
+    {
+      key: 'actions', header: '', align: 'actions',
+      render: (r) => (
+        <>
+          <Link to={`/ledger?itemType=${r._id}`}>History</Link>
+          <button type="button" className="btn btn-link" onClick={() => setAdjusting(r)}>Adjust</button>
+        </>
+      ),
+    },
+  ];
 
   return (
-    <div>
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Inventory Stock Overview</h1>
-          <p className="page-desc">
-            Live stock balances derived mathematically from immutable transaction ledgers (Purchases &ndash; Issues).
-          </p>
-        </div>
-        <div className="header-actions">
-          <Link to="/stock-ledger" className="btn btn-secondary btn-sm">
-            View Audit Ledger &rarr;
-          </Link>
-          <Link to="/purchases" className="btn btn-primary btn-sm">
-            + Purchase Stock
-          </Link>
-        </div>
+    <>
+      <PageHeader title="Stock" subtitle="Quantities on hand, calculated from the stock ledger" />
+      {notice && <Alert tone="success">{notice}</Alert>}
+      <Alert tone="danger">{error}</Alert>
+      {meta?.lowStockCount > 0 && <Alert tone="info">{meta.lowStockCount} item(s) are at or below their reorder level.</Alert>}
+      <div className="toolbar">
+        <input className="input" type="search" placeholder="Search items" aria-label="Search items" value={filters.q} onChange={set('q')} />
+        <select className="select" aria-label="Sort by" value={filters.sort} onChange={set('sort')}>
+          <option value="name">Sort by name</option>
+          <option value="balance">Sort by quantity (lowest first)</option>
+        </select>
+        <label className="check"><input type="checkbox" checked={filters.lowStock} onChange={set('lowStock')} /><span>Low stock only</span></label>
       </div>
-
-      <ErrorMessage message={error} onDismiss={() => setError("")} />
-
-      {/* Summary Cards */}
-      <div className="metrics-grid">
-        <div className="metric-card">
-          <div className="metric-label">Tracked Item Types</div>
-          <div className="metric-value">{stock.length}</div>
-          <div className="metric-sub">Catalog hardware items</div>
-        </div>
-        <div className="metric-card" style={{ borderLeft: "4px solid var(--primary)" }}>
-          <div className="metric-label">Total Units On Hand</div>
-          <div className="metric-value" style={{ color: "var(--primary)" }}>{totalQuantity}</div>
-          <div className="metric-sub">Net available in storage</div>
-        </div>
-        <div className="metric-card">
-          <div className="metric-label">Estimated Valuation</div>
-          <div className="metric-value">₹{totalValue.toLocaleString("en-IN", { minimumFractionDigits: 2 })}</div>
-          <div className="metric-sub">Calculated from purchase lots</div>
-        </div>
-      </div>
-
-      {/* Filter Bar */}
-      <div className="filter-bar">
-        <input
-          type="text"
-          className="form-control"
-          placeholder="Filter item name or category..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          style={{ width: "280px" }}
-        />
-        <div style={{ marginLeft: "auto", fontSize: "13px", color: "var(--text-muted)" }}>
-          Showing {filtered.length} of {stock.length} items
-        </div>
-      </div>
-
-      {loading ? (
-        <LoadingSpinner message="Calculating stock balances from ledger..." />
-      ) : filtered.length === 0 ? (
-        <EmptyState title="No stock records found" message="No inventory items match your search criteria." />
-      ) : (
-        <div className="table-responsive">
-          <table className="table">
-            <thead>
-              <tr>
-                <th>Item Name</th>
-                <th>Category</th>
-                <th>Unit</th>
-                <th>Total In</th>
-                <th>Total Out</th>
-                <th>Available Balance</th>
-                <th>Status</th>
-                <th>Valuation (₹)</th>
-                <th>Last Movement</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map((s) => {
-                const isOutOfStock = s.currentStock <= 0;
-                return (
-                  <tr key={s.itemType?._id}>
-                    <td>
-                      <strong>{s.itemType?.Type_name}</strong>
-                    </td>
-                    <td>{s.itemType?.category || "General"}</td>
-                    <td>{s.itemType?.unit || "pcs"}</td>
-                    <td style={{ color: "var(--success)" }}>+{s.totalIn}</td>
-                    <td style={{ color: "var(--danger)" }}>-{s.totalOut}</td>
-                    <td>
-                      <strong style={{ fontSize: "14px", color: isOutOfStock ? "var(--danger)" : "var(--primary)" }}>
-                        {s.currentStock} {s.itemType?.unit || "pcs"}
-                      </strong>
-                    </td>
-                    <td>
-                      <span className={`badge ${isOutOfStock ? "badge-danger" : "badge-success"}`}>
-                        {isOutOfStock ? "Out of Stock" : "In Stock"}
-                      </span>
-                    </td>
-                    <td>₹{(s.totalValue || 0).toLocaleString("en-IN", { minimumFractionDigits: 2 })}</td>
-                    <td>{s.lastTransaction ? new Date(s.lastTransaction).toLocaleDateString() : "-"}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-    </div>
+      <DataTable columns={columns} rows={data} loading={loading} emptyMessage={filters.lowStock ? 'No items are below their reorder level.' : 'No stock items found. Items appear here after a purchase is received.'} />
+      <Pagination meta={meta} onPage={setPage} />
+      {adjusting && <AdjustModal item={adjusting} onCancel={() => setAdjusting(null)} onDone={(m) => { setAdjusting(null); setNotice(m); reload(); }} />}
+    </>
   );
-};
+}

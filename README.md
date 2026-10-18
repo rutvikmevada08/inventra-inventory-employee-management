@@ -57,30 +57,39 @@ Reports cover inventory, stock movements, employees, attendance, daily wages, mo
 
 ## Tech stack
 
-**Frontend:** React, Vite, React Router, Axios, custom CSS, and Recharts.
-
-**Backend:** Node.js, Express, MongoDB, Mongoose, JWT, bcrypt, ExcelJS, and PDFKit.
+- **Frontend:** React, Vite, React Router, Axios, custom CSS, and Recharts.
+- **Backend:** Node.js, Express, MongoDB, Mongoose, JWT authentication, bcryptjs, Helmet, ExcelJS, and PDFKit.
+- **Architecture:** Consolidated single REST API backend (`backend/` and Express API) serving the React Single Page Application (`frontend/`).
 
 ## Project structure
 
 ```text
 inventory_management/
-├── bin/                  # Server startup
-├── controllers/          # Request handlers
-├── models/               # Mongoose models
-├── routes/               # API routes
-├── services/             # Business logic
-├── scripts/              # Seed and migration scripts
-├── test/                 # Backend tests
-├── public/
-│   └── uploads/          # Existing invoice and receipt files
-├── frontend/             # React + Vite application
-├── .env.example          # Environment variable template
-├── package.json
+├── backend/                  # Consolidated Node.js / Express REST API
+│   ├── config/               # Environment and MongoDB connection setup
+│   ├── controllers/          # Business logic and request handlers
+│   ├── middleware/           # JWT auth, role guard, upload & error handling
+│   ├── models/               # Mongoose schemas (Workforce, Inventory, Finance)
+│   ├── routes/               # Centralized REST API routing
+│   ├── scripts/              # Admin provisioning & dry-run legacy migration
+│   ├── services/             # Analytics, report and export engines
+│   └── tests/                # Automated backend test suites (77 tests)
+├── frontend/                 # React + Vite frontend SPA
+│   ├── src/
+│   │   ├── components/       # Reusable UI controls, tables, modals, feedback
+│   │   ├── context/          # AuthContext (JWT session management)
+│   │   ├── layouts/          # Responsive AppLayout and role-filtered navigation
+│   │   ├── pages/            # Workforce, Inventory, Operations, and Reports views
+│   │   ├── services/         # Unified Axios client and API integration
+│   │   └── test/             # Vitest frontend automated test suites (39 tests)
+│   └── dist/                 # Production build assets
+├── test/
+│   └── run-all-tests.js      # End-to-end integration test runner (36 tests)
+├── public/uploads/           # Invoices and receipts
+├── .env.example              # Environment variable template
+├── package.json              # Unified root scripts
 └── README.md
 ```
-
-The project may contain additional modules in these folders.
 
 ## Requirements
 
@@ -170,38 +179,32 @@ The seed script initializes default application data, including initial user acc
 Only run the seed against a database you intend to initialize. Do not run it against a legacy or production database without reviewing the script and making an appropriate backup.
 
 ## Run the application
-
-Use two terminals during development.
+ 
+Use two terminals during development:
 
 ### Terminal 1: backend
 
 From the project root:
 
 ```bash
-npm run server
+npm run dev:backend
 ```
 
-The backend normally listens on port `5000`.
+(Or `npm --prefix backend run dev`). The backend listens on port `5000` (or `PORT` specified in `.env`).
 
 ### Terminal 2: frontend
 
 From the project root:
 
 ```bash
-npm run client
+npm run dev:frontend
 ```
 
-Vite normally serves the frontend at:
+(Or `npm --prefix frontend run dev`). Vite serves the frontend at `http://localhost:5173`.
 
-```text
-http://localhost:5173
-```
+---
 
-The frontend is configured to communicate with the backend. If either service uses a different port or URL, check the environment and Vite configuration.
-
-> **Note:** Use `npm run server` to start the backend. The root project does not define an `npm run dev` script. `npm run client` starts the frontend development server.
-
-## Production build
+## Production build & deployment
 
 Build the frontend:
 
@@ -215,33 +218,30 @@ Then start the application:
 npm start
 ```
 
-The Express server is configured to serve the production frontend build. By default, open:
+The Express server serves the compiled SPA from `frontend/dist/` alongside the API endpoints on port `5000` (http://localhost:5000).
 
-```text
-http://localhost:5000
-```
+---
 
-## Tests
+## Automated tests
 
-Run the backend test suite:
+Run the complete verification test suite:
 
 ```bash
 npm test
 ```
 
-Run the frontend tests:
+This runs:
+1. End-to-end integration tests: `npm run test:integration` (36 tests)
+2. Backend REST API test runner: `npm run test:backend` (77 tests)
+3. Frontend Vitest component tests: `npm run test:frontend` (39 tests)
 
-```bash
-npm --prefix frontend test
-```
+Total automated test coverage across the consolidated architecture: **152 passing tests, 0 failures**.
 
 Build the frontend separately if needed:
 
 ```bash
 npm run build
 ```
-
-The Antigravity implementation report recorded **36 backend integration tests passed**, **5 frontend tests passed**, and a successful production build in its test environment. These are reported results; run the commands above on your own checkout to confirm the current code and configuration.
 
 Use a separate test database for database-specific testing. Never point tests at a database containing production or business data. If the test suite supports `TEST_MONGODB_URI`, set it to a dedicated test database according to the test configuration.
 

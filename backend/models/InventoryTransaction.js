@@ -35,4 +35,10 @@ schema.pre('save', function onlyNew(next) {
   next();
 });
 
+schema.virtual('transactionType').get(function () {
+  return this.type === 'in' ? 'STOCK_IN' : 'STOCK_OUT';
+});
+schema.set('toJSON', { virtuals: true });
+schema.set('toObject', { virtuals: true });
+
 module.exports = mongoose.model('InventoryTransaction', schema);

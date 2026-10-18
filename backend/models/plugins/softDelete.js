@@ -7,12 +7,21 @@ module.exports = function softDelete(schema) {
     deactivatedBy: { type: schema.constructor.Types.ObjectId, ref: 'User' },
   });
 
-  schema.methods.deactivate = function deactivate(userId) {
-    this.isActive = false;
-    this.deactivatedAt = new Date();
-    this.deactivatedBy = userId;
-    return this.save();
-  };
+  schema.methods.deactivate = async function deactivate(userId) {
+  this.isActive = false;
+  this.deactivatedAt = new Date();
+  this.deactivatedBy = userId;
+
+  await this.updateOne({
+    $set: {
+      isActive: false,
+      deactivatedAt: this.deactivatedAt,
+      deactivatedBy: userId,
+    },
+  });
+
+  return this;
+};
 
   schema.methods.reactivate = function reactivate() {
     this.isActive = true;
